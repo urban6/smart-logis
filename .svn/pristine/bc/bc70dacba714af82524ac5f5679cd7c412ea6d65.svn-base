@@ -1,0 +1,57 @@
+package kr.co.shovvel.dm.service.logis.warehouse;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.co.shovvel.dm.dao.logis.warehouse.WarehouseMapper;
+import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseHistoryVO;
+import kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO;
+
+@Service
+public class WarehouseService {
+	
+	@Autowired
+	private WarehouseMapper warehouseMapper;
+	
+	private Logger logger = Logger.getLogger(this.getClass());
+	
+	
+	 public void setWarehouseHistory(Map<String , Object> orderInfo, String userUid) {
+		 	WarehouseHistoryVO history = new WarehouseHistoryVO();
+		 	try {
+			 	history.setEnd_time((String)orderInfo.get("backDate"));
+			 	history.setIsPay((String)(orderInfo.get("isPay")));
+			 	history.setPay_type((String)(orderInfo.get("checkPayMethod")));
+			 	history.setStart_time((String)(orderInfo.get("entrustDate")));
+			 	history.setSize((String)(orderInfo.get("quantity")));
+			 	history.setPrice(Integer.parseInt((String)(orderInfo.get("totalPrice"))));
+			 	history.setUser_uid(Integer.parseInt(userUid));
+			 	history.setLocation("Test Warehouse");
+			 	
+
+			} catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+		 	logger.debug("12312321312312"+(String)(orderInfo.get("entrustDate")));
+	    	warehouseMapper.setWarehouseHistory(history);
+
+	    }
+	 
+	 public SellerProductInfoVO getProductInfo() {
+		 return warehouseMapper.getProductInfo();
+	 }
+
+	 public List<WarehouseSearchInfo> searchWarehouseHistory(String userUid) {
+	 	return warehouseMapper.searchWarehouseHistory(userUid);
+	 }
+
+	 public WarehouseSearchInfo searchWarehouseHistoryDetail(String wareHistUid) {
+	 	return warehouseMapper.searchWarehouseHistoryDetail(wareHistUid);
+	 }
+}

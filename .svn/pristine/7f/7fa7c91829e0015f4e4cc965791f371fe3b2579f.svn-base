@@ -1,0 +1,173 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: jeonseungcheol
+  Date: 2020/11/04
+  Time: 2:23 오후
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>물류 공유해 : 메인</title>
+
+    <meta content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
+          name="viewport">
+
+    <%-- Reset CSS --%>
+    <link rel="stylesheet" href="/css/reset.css">
+
+    <%-- Bootstrap, JQuery Library --%>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // 창고 신청하기
+            $("#warehouseApply").click(function (key) {
+                movePage("POST", "/user/warehouse/apply");
+            });
+
+            // 창고 조회하기
+            $("#warehouseSearch").click(function (key) {
+                movePage("POST", "/user/warehouse/search");
+            });
+
+            // 물류 신청하기
+            $("#logisApply").click(function (key) {
+                movePage("POST", "/user/logis/apply");
+            });
+
+            // 물류 조회하기
+            $("#logisSearch").click(function (key) {
+                movePage("POST", "/user/logis/search");
+            });
+        });
+
+        function movePage(method, action) {
+            const form = document.createElement('form');
+            form.setAttribute('method', method);
+            form.setAttribute('action', action);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
+    <style>
+        #wrap {
+            width: 100%;
+            margin: 0 auto;
+            max-height: 100vh;
+            background-color: white;
+        }
+
+        .header {
+            height: 8vh;
+            background-color: #f0f0f0;
+        }
+
+        .section {
+            height: 84vh;
+        }
+
+        .footer {
+            height: 8vh;
+        }
+
+        .half-box {
+            float: left;
+            width: 100%;
+            height: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid lightgrey;
+        }
+
+        .span-warehouse-title {
+            font-size: 3rem;
+        }
+
+        .span-logis-title {
+            font-size: 3rem;
+        }
+
+        /* 769 ~ 부터 div의 가로 크기가 50% 으로 변경*/
+        @media (min-width: 769px) {
+            .half-box {
+                width: 49.99999%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-right: 1px solid lightgrey;
+                border-bottom: 1px solid lightgrey;
+            }
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            height: 40%;
+            justify-content: space-between;
+        }
+
+        .btn-item {
+            width: 100%;
+            height: 40%;
+            display: table;
+            cursor: pointer;
+            box-shadow: 6px 6px 6px 6px #e6e6e6;
+            border-radius: 8px;
+        }
+
+        .span-title {
+            display:table-cell;
+            vertical-align:middle;
+            text-align: center;
+            font-size: x-large;
+        }
+
+    </style>
+</head>
+<body>
+<div id="wrap">
+    <div class="header">
+    </div>
+    <div class="section">
+
+        <div class="half-box" style="background-color: #FFFFFF">
+            <div class="btn-container">
+                <div id="warehouseApply" class="btn-item">
+                    <span class="span-title">창고 신청하기</span>
+                </div>
+                <div id="warehouseSearch" class="btn-item">
+                    <span class="span-title">창고 조회하기</span>
+                </div>
+            </div>
+        </div>
+        <div class="half-box" style="background-color: #FFFFFF">
+            <div class="btn-container">
+                <div id="logisApply" class="btn-item">
+                    <span class="span-title">물류 신청하기</span>
+                </div>
+                <div id="logisSearch" class="btn-item">
+                    <span class="span-title">물류 조회하기</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+
+    </div>
+</div>
+
+</body>
+</html>

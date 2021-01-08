@@ -1,0 +1,101 @@
+package kr.co.shovvel.dm.controller.logis.warehouse;
+
+import kr.co.shovvel.dm.domain.logis.search.LogisSearchInfo;
+import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+import org.apache.log4j.Logger;
+
+import kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO;
+import kr.co.shovvel.dm.service.logis.warehouse.WarehouseService;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping(value = "/user/warehouse")
+public class WarehouseController {
+
+    private Logger logger = Logger.getLogger(this.getClass());
+    @Autowired
+    WarehouseService warehouseService;
+
+    @RequestMapping("/apply")
+    public ModelAndView warehouseapply(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+        SellerProductInfoVO productInfo = warehouseService.getProductInfo();
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("logis/apply/warehouseApply");
+        mav.addObject("productInfo", productInfo);
+        return mav;
+    }
+
+
+    @RequestMapping("/search")
+    public ModelAndView warehousesearch(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        HttpSession session = request.getSession();
+        String userUid = (String) session.getAttribute("userUid");
+
+        List<WarehouseSearchInfo> infoList = warehouseService.searchWarehouseHistory(userUid);
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("logis/search/warehouseSearch");
+        mav.addObject("infoList", infoList);
+        return mav;
+    }
+
+    @RequestMapping("/searchDetail")
+    public ModelAndView searchDetail(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        String wareHistUid = request.getParameter("wareHistUid");
+
+        WarehouseSearchInfo info = warehouseService.searchWarehouseHistoryDetail(wareHistUid);
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("info", info);
+        mav.setViewName("logis/search/warehouseSearchDetail");
+        return mav;
+    }
+
+    @RequestMapping("/complete")
+    public ModelAndView warehouseComplete(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("logis/complete/warehouseComplete");
+        return mav;
+    }
+
+    @RequestMapping("/order")
+    public ModelAndView warehouseOrder(HttpServletResponse response, HttpServletRequest request, @RequestParam Map<String, Object> param, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+        HttpSession session = request.getSession();
+        String userUid = (String) session.getAttribute("userUid");
+        // warehouseService.setWarehouseHistory(param, userUid);
+
+        String isStatus = (String) param.get("checkPayMethod");
+        int quantity = Integer.parseInt((String) (param.get("quantity")));
+        int days = Integer.parseInt((String) (param.get("days")));
+
+        int totalQuantity = quantity * days;
+
+        logger.debug("!@#!@#  " + isStatus);
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("isStatus", isStatus);
+        mav.addObject("quantity", totalQuantity);
+        mav.setViewName("logis/complete/warehouseComplete");
+        return mav;
+    }
+}

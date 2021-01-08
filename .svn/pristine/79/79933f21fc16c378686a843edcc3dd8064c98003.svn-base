@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.taxi.driver.home.DriverHomeMapper">
+
+    <select id="selectTaxiByTaxiNumber" parameterType="String" resultType="kr.co.shovvel.dm.domain.taxi.driver.home.Taxi">
+        SELECT *
+        FROM taxi
+        WHERE TAXI_NUMBER = '${taxi_number}'
+    </select>
+
+    <!-- 운행 대기 중인 상태에서 승객 목록을 가져온다. -->
+    <!-- 차 번호로 구분을 하는 것이 가장 맞지 않을까 싶은데... -->
+    <select id="selectDriving" parameterType="string">
+        SELECT *
+        FROM driving
+        WHERE TAXI_NUMBER = '${taxi_number}'
+    </select>
+
+    <!-- 기사가 운행 대기를 눌렀을 때, 대기 중인 새로운 택시 데이터를 추가한다. -->
+    <!-- STATE : 0 = 운행 대기, 1 = 운행 증, 2 = 운행 종료 -->
+    <insert id="insertTaxiDriving" useGeneratedKeys="true" keyProperty="drivingUid"
+            parameterType="kr.co.shovvel.dm.domain.taxi.driver.home.TaxiDriving">
+        INSERT INTO taxi_driving ( DRIVER_LOGIN_UID, STATE, WAIT_START_TIME, TAXI_NUMBER )
+        VALUES ( #{driverLoginUid}, 0, NOW(), #{taxiNumber} );
+    </insert>
+
+    <!-- 기사가 운행 대기를 누를 때, 새로운 데이터를 추가하는데 그 데이터에 대한 KEY를 조회한다. -->
+    <!-- 수정할 수 있으면 INSERT 할 떄, KEY를 조회할 수 있으면 더 편할 듯 -->
+    <select id="selectDrivingUid" parameterType="string" resultType="string">
+        SELECT DRIVING_UID
+        FROM taxi_driving
+        WHERE DRIVER_LOGIN_UID = ${driverLoginUid}
+        ORDER BY WAIT_START_TIME DESC
+        LIMIT 1;
+    </select>
+
+    <!-- 기사가 배차 대기를 눌렀을 때, 기존의 잘못된 데이터가 있을 경우를 대비해서 STATE를 운행종료(2)로 변경한다. -->
+    <update id="updatePrevState" parameterType="string">
+        UPDATE taxi_driving
+        SET STATE = 2
+        WHERE DRIVER_LOGIN_UID = ${driverLoginUid};
+    </update>
+
+    <!-- 운행 고유번호와 연결된 승객 목록을 조회한다. -->
+    <select id="selectPassgenerList" resultType="kr.co.shovvel.dm.domain.taxi.driver.home.Passgener">
+        SELECT DRIVING_LOG_UID, tu.USER_NAME, tu.USER_HP_NO, START_LOCATION, ARRIVE_LOCATION, tdl.STATE
+        FROM taxi_driving_log AS tdl
+        JOIN taxi_user tu on tdl.USER_UID = tu.USER_UID
+        WHERE tdl.STATE = 0
+        AND START_TIME > DATE_ADD(NOW(), INTERVAL -2 HOUR);
+    </select>
+
+    <select id="selectBoardingPassgenerList" resultType="kr.co.shovvel.dm.domain.taxi.driver.home.Passgener">
+        SELECT DRIVING_LOG_UID, tu.USER_NAME, tu.USER_HP_NO, START_LOCATION, ARRIVE_LOCATION, tdl.STATE
+        FROM taxi_driving_log AS tdl
+        JOIN taxi_user tu on tdl.USER_UID = tu.USER_UID
+        WHERE DRIVING_UID = #{drivingUid}
+        AND START_TIME > DATE_ADD(NOW(), INTERVAL -2 HOUR);
+    </select>
+
+    <!-- 기사가 운행 대기 또는  -->
+    <select id="searchIsDriving" parameterType="string" resultType="kr.co.shovvel.dm.domain.taxi.driver.home.TaxiDriving">
+        SELECT *
+        FROM taxi_driving
+        WHERE STATE = 0
+        AND WORK_UID = (
+        SELECT WORK_UID
+        FROM taxi_work AS w
+        JOIN taxi_driver d on w.DRIVER_UID = d.DRIVER_UID
+        WHERE w.WORK_STATE = 1
+        AND DATE(WORK_START_TIME) = DATE(NOW())
+        AND w.DRIVER_UID = ${driverUid}
+        LIMIT 1
+        )
+        ORDER BY DRIVING_UID DESC
+        LIMIT 1;
+    </select>
+
+    <!-- 가장 최근에 만들어진 운행 데이터를 조회한다. -->
+    <select id="searchCreatedDriving" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.taxi.driver.home.TaxiDriving">
+        SELECT DRIVING_UID, STATE
+        FROM taxi_driving
+        WHERE DRIVER_LOGIN_UID = #{driverLoginUid}
+        ORDER BY WAIT_START_TIME DESC
+        LIMIT 1;
+    </select>
+
+    <!-- 운행 대기 상태를 취소한다. 3 -> 운행 취소 상태 -->
+    <update id="cancelDrivingWait" parameterType="string">
+        UPDATE taxi_driving
+        SET STATE = 3
+        WHERE DRIVING_UID = #{drivingUid};
+    </update>
+
+    <update id="updateboardingState" parameterType="string">
+        UPDATE taxi_driving_log
+        SET STATE = 1,
+        DRIVING_UID = #{drivingUid},
+        TAXI_NUMBER = #{taxiNumber}
+        WHERE DRIVING_LOG_UID = #{drivingLogUid};
+    </update>
+
+    <!-- 운행을 시작했을 때, 택시에 탑승한 승객의 상태를 3 = 운행중으로 변경한다. -->
+    <update id="updateDrivingStateOfPassenger" parameterType="string">
+        UPDATE taxi_driving_log
+        SET STATE = 3
+        WHERE DRIVING_UID = #{drivingUid};
+    </update>
+
+    <!-- 운행을 시작했을 때, 택시 기사의 상태를 1 = 운행중으로 변경한다. -->
+    <update id="updateDrivingStateOfDriver" parameterType="string">
+        UPDATE taxi_driving
+        SET STATE = 1
+        WHERE DRIVING_UID = #{drivingUid};
+    </update>
+
+    <!-- 운행 중인 택시의 승객 리스트를 조회한다. -->
+    <select id="selectDrivingPassengerList" parameterType="string" resultType="kr.co.shovvel.dm.domain.taxi.driver.home.Passgener">
+        SELECT DRIVING_LOG_UID, USER_NAME, USER_HP_NO, START_LOCATION, ARRIVE_LOCATION, IS_PAY, STATE
+        FROM taxi_driving_log AS tdl
+        JOIN taxi_user tu on tu.USER_UID = tdl.USER_UID
+        WHERE DRIVING_UID = #{drivingUid};
+    </select>
+
+    <!-- 승객에게 결제 요청을 한다. -->
+    <update id="updateRequestPay" parameterType="string">
+        UPDATE taxi_driving_log
+        SET STATE = 4
+        WHERE DRIVING_LOG_UID = #{drivingLogUid}
+    </update>
+
+</mapper>

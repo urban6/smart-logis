@@ -1,0 +1,94 @@
+package kr.co.shovvel.dm.domain.management.pay;
+
+import java.sql.Timestamp;
+
+public class SellerProductOrderVO {
+	 private int order_uid;
+	 private String sellerOrderReferenceKey;
+	 private String cpId;
+	 private String productId;
+	 private int orderQuantity;
+	 private String sellerOrderProductReferenceKey;
+	 private String userUid;
+	 private int sortOrdering;
+	 private Timestamp order_date;
+	 private String orderProductNo;
+	 private String orderProductStatusCode;
+	 private String orderProductStatusName;
+	 
+	 
+	public int getOrder_uid() {
+		return order_uid;
+	}
+	public void setOrder_uid(int order_uid) {
+		this.order_uid = order_uid;
+	}
+	public String getSellerOrderReferenceKey() {
+		return sellerOrderReferenceKey;
+	}
+	public void setSellerOrderReferenceKey(String sellerOrderReferenceKey) {
+		this.sellerOrderReferenceKey = sellerOrderReferenceKey;
+	}
+	public String getCpId() {
+		return cpId;
+	}
+	public void setCpId(String cpId) {
+		this.cpId = cpId;
+	}
+	public String getProductId() {
+		return productId;
+	}
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+	public int getOrderQuantity() {
+		return orderQuantity;
+	}
+	public void setOrderQuantity(int orderQuantity) {
+		this.orderQuantity = orderQuantity;
+	}
+	public String getSellerOrderProductReferenceKey() {
+		return sellerOrderProductReferenceKey;
+	}
+	public void setSellerOrderProductReferenceKey(String sellerOrderProductReferenceKey) {
+		this.sellerOrderProductReferenceKey = sellerOrderProductReferenceKey;
+	}
+	public String getUserUid() {
+		return userUid;
+	}
+	public void setUserUid(String userUid) {
+		this.userUid = userUid;
+	}
+	public int getSortOrdering() {
+		return sortOrdering;
+	}
+	public void setSortOrdering(int sortOrdering) {
+		this.sortOrdering = sortOrdering;
+	}
+	public Timestamp getOrder_date() {
+		return order_date;
+	}
+	public void setOrder_date(Timestamp order_date) {
+		this.order_date = order_date;
+	}
+	public String getOrderProductNo() {
+		return orderProductNo;
+	}
+	public void setOrderProductNo(String orderProductNo) {
+		this.orderProductNo = orderProductNo;
+	}
+	public String getOrderProductStatusCode() {
+		return orderProductStatusCode;
+	}
+	public void setOrderProductStatusCode(String orderProductStatusCode) {
+		this.orderProductStatusCode = orderProductStatusCode;
+	}
+	public String getOrderProductStatusName() {
+		return orderProductStatusName;
+	}
+	public void setOrderProductStatusName(String orderProductStatusName) {
+		this.orderProductStatusName = orderProductStatusName;
+	}
+	 
+	 
+}

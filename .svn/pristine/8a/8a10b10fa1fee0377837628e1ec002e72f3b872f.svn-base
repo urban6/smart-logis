@@ -1,0 +1,123 @@
+package kr.co.shovvel.dm.domain.logis.apply;
+
+/**
+ * 택배를 신청할 때, 필요한 데이터
+ */
+public class LogisApplyInfo {
+
+    private String logisHistUid;
+
+    private String userUid;
+
+    // 보내는 분 정보
+    private String senderName;
+    private String senderPhone;
+    private String senderPostcode;
+    private String senderAddress;
+
+    // 받는 분 정보
+    private String receiverName;
+    private String receiverPhone;
+    private String receiverPostcode;
+    private String receiverAddress;
+
+    private String weight; // 중량
+
+    private int price; // 가격
+
+    public String getLogisHistUid() {
+        return logisHistUid;
+    }
+
+    public String getUserUid() {
+        return userUid;
+    }
+
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
+    }
+
+    public void setLogisHistUid(String logisHistUid) {
+        this.logisHistUid = logisHistUid;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderPhone() {
+        return senderPhone;
+    }
+
+    public void setSenderPhone(String senderPhone) {
+        this.senderPhone = senderPhone;
+    }
+
+    public String getSenderPostcode() {
+        return senderPostcode;
+    }
+
+    public void setSenderPostcode(String senderPostcode) {
+        this.senderPostcode = senderPostcode;
+    }
+
+    public String getSenderAddress() {
+        return senderAddress;
+    }
+
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public String getReceiverPhone() {
+        return receiverPhone;
+    }
+
+    public void setReceiverPhone(String receiverPhone) {
+        this.receiverPhone = receiverPhone;
+    }
+
+    public String getReceiverPostcode() {
+        return receiverPostcode;
+    }
+
+    public void setReceiverPostcode(String receiverPostcode) {
+        this.receiverPostcode = receiverPostcode;
+    }
+
+    public String getReceiverAddress() {
+        return receiverAddress;
+    }
+
+    public void setReceiverAddress(String receiverAddress) {
+        this.receiverAddress = receiverAddress;
+    }
+
+    public String getWeight() {
+        return weight;
+    }
+
+    public void setWeight(String weight) {
+        this.weight = weight;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+}

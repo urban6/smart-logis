@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.pay.PayMapper">
+	
+	<select id="getSellerInfo" parameterType="int" resultType="kr.co.shovvel.dm.domain.management.pay.SellerInfoVO">
+	        SELECT 
+	               *
+	            FROM SELLER_INFO
+	            WHERE 1=1
+	            AND SELLER_UID = #{ sellerUid }
+	    </select>
+
+	<select id="getProductInfo" parameterType="string" resultType="kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO">
+		SELECT 
+			* 
+			FROM SELLER_PRODUCT_INFO
+			WHERE 1=1
+			AND CPID = #{ cpId }
+	</select>
+	
+	 <select id="getProductInfo_Selected" parameterType="string" resultType="Hashmap">
+		SELECT 
+			 cpId, productId,productAmt,productPaymentAmt,sortOrdering,productName,orderConfirmUrl,orderConfirmMobileUrl,productImageUrl,sellerOrderProductReferenceKey,taxationType
+			
+				FROM SELLER_PRODUCT_INFO
+				WHERE 1=1
+				AND SELLERORDERPRODUCTREFERENCEKEY = #{ sellerOrderProductReferenceKey }
+	</select> 
+	
+	<insert id="setUserOrder" parameterType="kr.co.shovvel.dm.domain.management.pay.SellerProductOrderVO">
+		INSERT INTO SELLER_PRODUCT_ORDER 
+			(CPID
+			, ORDERQUANTITY
+			, PRODUCTID
+			, SELLERORDERPRODUCTREFERENCEKEY
+			, SELLERORDERREFERENCEKEY
+			, SORTORDERING
+			, USER_UID)
+		VALUES
+			(
+			#{cpId}
+			,#{orderQuantity}
+			,#{productId}
+			,#{sellerOrderProductReferenceKey}
+			,#{sellerOrderReferenceKey}
+			,#{sortOrdering}
+			,#{user_uid}
+			)
+	</insert>
+	
+	<select id="getOrderInfo" parameterType="string" resultType="Hashmap">
+		SELECT 
+			sellerKey,sellerOrderReferenceKeyType,currency,totalTaxfreeAmt,totalTaxableAmt,totalVatAmt
+			,orderTitle,returnUrl,returnUrlParam,nonBankbookDepositInformUrl,orderMethod,orderChannel,inAppYn,individualCustomNoInputYn,orderSheetUiType,payMode
+			
+			FROM SELLER_ORDER
+			WHERE 1=1
+			AND SELLERKEY = #{ sellerKey}
+	</select>
+	
+	<select id="getOrderTotalPrice" parameterType="String" resultType="Hashmap">
+		SELECT 
+			a.productPaymentAmt, b.orderQuantity 
+		FROM seller_product_info a RIGHT JOIN seller_product_order b 
+		on a.sellerOrderProductReferenceKey = b.sellerOrderProductReferenceKey 
+		WHERE b.SELLERORDERREFERENCEKEY = #{ sellerOrderReferenceKey}
+	</select>
+	
+	<update id="updateUserOrder" parameterType="kr.co.shovvel.dm.domain.management.pay.SellerProductOrderVO">
+		UPDATE SELLER_PRODUCT_ORDER SET 
+			ORDERPRODUCTNO  = #{orderProductNo}
+			,ORDERPRODUCTSTATUSCODE = #{orderProductStatusCode}
+			,ORDERPRODUCTSTATUSNAME = #{ orderProductStatusName}
+			WHERE 1=1
+			AND SELLERORDERREFERENCEKEY = #{sellerOrderReferenceKey}
+			AND SELLERORDERPRODUCTREFERENCEKEY = #{sellerOrderProductReferenceKey}
+	</update>
+	
+	<update id="setOrderApproval" parameterType="kr.co.shovvel.dm.domain.management.pay.SellerApprovalVO">
+		UPDATE SELLER_APPROVAL SET
+			ORDERNO = #{orderNo}
+			,ORDERCHANNEL = #{orderChannel}
+			,TOTALORDERAMT = #{totalOrderAmt}
+			,TOTALPAYMENTAMT = #{totalPaymentAmt}
+			,PAYMENTCOMPLETIONYN = #{paymentCompletionYn}
+			,ORDERCERTIFYKEY = #{orderCertifyKey}
+			,PAYMENTTRADENO = #{paymentTradeNo}
+			,PAYMENTMETHODCODE = #{paymentMethodCode}
+			,PAYMENTMETHODNAME = #{paymentMethodName}
+			,TRADEYMDT = #{tradeYmdt}
+			,PGADMISSIONNO = #{pgAdmissionNo}
+			,PGADMISSIONYMDT = #{pgAdmissionYmdt}
+			,TOTALCANCELPOSSIBLEAMT = #{totalPaymentAmt}
+			WHERE 1=1
+			AND SELLERORDERREFERENCEKEY = #{sellerOrderReferenceKey}
+	</update>
+	
+	<insert id="setOrder" parameterType="kr.co.shovvel.dm.domain.management.pay.SellerApprovalVO">
+		INSERT INTO SELLER_APPROVAL
+		(
+			SELLERORDERREFERENCEKEY
+			,USER_UID
+			,ORDERRETURNURL
+		)
+		VALUES
+		(
+			#{sellerOrderReferenceKey}
+			,#{user_uid}
+			,#{orderReturnUrl}
+		)
+	</insert>
+	
+	<select id="getOrderProductPrice" parameterType="String" resultType="Hashmap">
+		SELECT 
+			a.cpId, a.productId, a.productPaymentAmt, b.orderQuantity 
+		FROM seller_product_info a RIGHT JOIN seller_product_order b 
+		on a.sellerOrderProductReferenceKey = b.sellerOrderProductReferenceKey 
+		WHERE b.SELLERORDERREFERENCEKEY = (SELECT SELLERORDERREFERENCEKEY from seller_approval WHERE ORDERNO = #{orderNo})
+		AND b.sellerOrderProductReferenceKey = #{ sellerOrderProductReferenceKey}
+	</select>
+	
+	<update id="updateCancel" parameterType="kr.co.shovvel.dm.domain.management.pay.SellerApprovalVO">
+		UPDATE SELLER_APPROVAL SET
+			IS_CANCEL = 1
+			,TOTALCANCELPOSSIBLEAMT = #{totalCancelPossibleAmt}
+			,CANCEL_MEMO = #{cancel_memo}
+			WHERE 1=1
+			AND ORDERNO = #{orderNo}
+	</update>
+
+</mapper>
+
+				

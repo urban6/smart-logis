@@ -1,0 +1,570 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: jeonseungcheol
+  Date: 2020/11/05
+  Time: 10:01 오전
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="kr.co.shovvel.dm.common.Consts" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>물류 공유해 : 물류 신청</title>
+
+    <meta content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
+          name="viewport">
+
+    <%-- Bootstrap, JQuery Library --%>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <%-- 우편번호 --%>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <%-- Reset CSS --%>
+    <link rel="stylesheet" href="/css/reset.css">
+
+    <c:set var="SUCCESS"><%=Consts.LOGIS_APPLY_RESULT.SUCCESS%>
+    </c:set>
+    <c:set var="FAIL"><%=Consts.LOGIS_APPLY_RESULT.FAIL%>
+    </c:set>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#btnReqSenderAddr").click(function () {
+                requestSenderAddress();
+            });
+
+            $("#btnReqReceiverAddr").click(function () {
+                requestReceiverAddress();
+            });
+
+            $("#btnCancel").click(function () {
+                history.back();
+            });
+
+            $("#btnApply").click(function () {
+                requestApply();
+            });
+        });
+
+        // 택배 신청하기
+        function requestApply() {
+            if (validate()) {
+                let param = {};
+                param.senderName = $("#senderName").val();
+                param.senderPhone = $("#senderPhone1").val() + $("#senderPhone2").val() + $("#senderPhone3").val();
+                param.senderPostcode = $("#senderPostcode").val();
+                param.senderAddress = $("#senderAddress").val();
+
+                param.receiverName = $("#receiverName").val();
+                param.receiverPhone = $("#receiverPhone1").val() + $("#receiverPhone2").val() + $("#receiverPhone3").val();
+                param.receiverPostcode = $("#receiverPostcode").val();
+                param.receiverAddress = $("#receiverAddress").val();
+
+                param.weight = $("#selectWeight option:selected").val();
+
+                // FIXME - 가격은 현재 미정, 나중에 고쳐야 함.
+                param.price = 20000;
+
+                const form = document.createElement('form');
+                form.setAttribute('method', 'POST');
+                form.setAttribute('action', '/user/logis/applyAction');
+                form.appendChild(logisApplyInfo);
+                document.body.appendChild(form);
+                form.submit();
+
+                /*
+                $.ajax("/user/logis/applyAction",
+                    {
+                         method: 'POST',
+                         data: param,
+                         dataType: 'JSON'
+                    }
+                ).done(function (data) {
+
+                }).fail(function (data) {
+                    // Error
+                }).always(function () {
+                    // Complete
+                });
+                 */
+            }
+        }
+
+        function validate() {
+            // 보내는 사람 데이터 확인
+            const senderName = document.getElementById("senderName");
+
+            const senderPhone1 = document.getElementById("senderPhone1");
+            const senderPhone2 = document.getElementById("senderPhone2");
+            const senderPhone3 = document.getElementById("senderPhone3");
+
+            const senderPostcode = document.getElementById("senderPostcode");
+            const senderAddress = document.getElementById("senderAddress");
+            const senderDetailAddress = document.getElementById("senderDetailAddress");
+
+            // 받는 사람 데이터 확인
+            const receiverName = document.getElementById("receiverName");
+
+            const receiverPhone1 = document.getElementById("receiverPhone1");
+            const receiverPhone2 = document.getElementById("receiverPhone2");
+            const receiverPhone3 = document.getElementById("receiverPhone3");
+
+            const receiverPostcode = document.getElementById("receiverPostcode");
+            const receiverAddress = document.getElementById("receiverAddress");
+            const receiverDetailAddress = document.getElementById("receiverDetailAddress");
+
+            // ---------------------- 보내는 사람 데이터 입력 확인 ----------------------
+            if (senderName.value === "") {
+                alert("보내는 분의 이름을 입력해주세요.");
+                senderName.focus();
+                return false;
+            }
+
+            if (senderPhone1.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                senderPhone1.focus();
+                return false;
+            }
+
+            if (senderPhone2.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                senderPhone2.focus();
+                return false;
+            }
+
+            if (senderPhone3.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                senderPhone3.focus();
+                return false;
+            }
+
+            if (senderPostcode.value === "" || senderAddress.value === "") {
+                alert("주소를 입력해주세요.");
+                senderPostcode.focus();
+                return false;
+            }
+
+            // ---------------------- 받는 사람 데이터 입력 확인 ----------------------
+
+            if (receiverName.value === "") {
+                alert("보내는 분의 이름을 입력해주세요.");
+                receiverName.focus();
+                return false;
+            }
+
+            if (receiverPhone1.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                receiverPhone1.focus();
+                return false;
+            }
+
+            if (receiverPhone2.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                receiverPhone2.focus();
+                return false;
+            }
+
+            if (receiverPhone3.value === "") {
+                alert("휴대폰 번호를 확인해주세요.");
+                receiverPhone3.focus();
+                return false;
+            }
+
+            if (receiverPostcode.value === "" || receiverAddress.value === "") {
+                alert("주소를 입력해주세요.");
+                receiverPostcode.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        // 다음 우편번호 API 팝업
+        function requestSenderAddress() {
+            new daum.Postcode({
+                oncomplete: function (data) {
+                    let addr = ''; // 주소 변수
+
+                    // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                    if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                        addr = data.roadAddress;
+                    } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                        addr = data.jibunAddress;
+                    }
+
+                    // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                    document.getElementById('senderPostcode').value = data.zonecode;
+                    document.getElementById("senderAddress").value = addr;
+
+                    // 커서를 상세주소 필드로 이동한다.
+                    document.getElementById("senderDetailAddress").focus();
+                }
+            }).open();
+        }
+
+        // 다음 우편번호 API 팝업
+        function requestReceiverAddress() {
+            new daum.Postcode({
+                oncomplete: function (data) {
+                    let addr = ''; // 주소 변수
+
+                    // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                    if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                        addr = data.roadAddress;
+                    } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                        addr = data.jibunAddress;
+                    }
+
+                    // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                    document.getElementById('receiverPostcode').value = data.zonecode;
+                    document.getElementById("receiverAddress").value = addr;
+
+                    // 커서를 상세주소 필드로 이동한다.
+                    document.getElementById("receiverDetailAddress").focus();
+                }
+            }).open();
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'gimhae-font-regular';
+            src: url('../../../../fonts/GimhaeGayaR.ttf');
+        }
+
+        body {
+            font-family: 'gimhae-font-regular', serif !important;
+        }
+
+        #wrap {
+            width: 540px;
+            background-color: white;
+            margin: 0 auto;
+        }
+
+        /* 화면 너비 0 ~ 768px */
+        @media (max-width: 768px) {
+            #wrap {
+                width: 100%;
+            }
+        }
+
+        .header {
+            width: 100%;
+            height: 8vh;
+            padding-top: 5%;
+        }
+
+        .section {
+            width: 100%;
+            height: 92vh;
+        }
+
+        .table-top {
+            /*padding: 18px 30px 15px 0;*/
+            padding: 18px 30px 15px;
+            border-top: 4px solid #00876c;
+            border-bottom: 1px solid lightgrey;
+            margin-bottom: 15px;
+            background: #f2f2f2;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table, th {
+            padding: 10px 10px 16px 20px;
+        }
+
+        .tr-border-top {
+            border-top: 1px solid lightgrey;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        td {
+            padding: 10px 10px;
+        }
+
+        .form-table {
+            margin-bottom: 56px;
+        }
+
+        .form-table-wrap {
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            font-size: large;
+        }
+
+        .input-type-1, .input-type-1:read-only {
+            margin-top: 2%;
+            background-color: white;
+        }
+
+        .button-type-1 {
+            margin-top: 2%;
+            margin-left: 2%;
+        }
+
+        .form-title {
+            font-size: 1.3em;
+        }
+
+        .div-result {
+            border-top: 1px solid lightgrey;
+            margin-top: 5%;
+            padding: 5% 2% 0 2%;
+            margin-bottom: 5%;
+            display: flex;
+            justify-content: space-between
+        }
+
+        .input-name {
+            width: 60%;
+        }
+
+        .input-phone {
+            width: 30%;
+        }
+
+        .input-address {
+            width: 90%;
+        }
+
+        .input-postcode {
+            width: 40%;
+        }
+
+    </style>
+</head>
+<body>
+<div id="wrap">
+    <div class="header">
+    </div>
+    <div class="section">
+        <h4 style="font-weight: 400; text-align: center; font-size: 2.0em; margin-bottom: 5%">물류 예약하기</h4>
+
+        <%-- 보내는 분 --%>
+        <form id="logisReservation" name="logisReservation" method="post" onsubmit="return validate()"
+              action="/user/logis/applyAction">
+            <div class="form-table">
+                <table>
+                    <colgroup>
+                        <col style="width: 25%">
+                        <col style="width: 75%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="row" colspan="2" class="pl-0 pr-0">
+                            <div class="table-top">
+                                <strong class="form-title">보내는 분</strong>
+                            </div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="senderName">이름</label>
+                        <td>
+                            <input class="form-control input-lg input-name" type="text" id="senderName"
+                                   name="senderName"
+                                   value="테스형" maxlength="30">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label>연락처</label>
+                        <td>
+                            <ul>
+                                <li style="display: list-item">
+                                    <div class="form-table-wrap mb-2">
+                                        <input class="form-control input-lg input-phone" type="tel" id="senderPhone1"
+                                               name="senderPhone1" maxlength="4" value="010"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                        <span style="margin-left: 1%; margin-right: 1%">-</span>
+                                        <input class="form-control input-lg input-phone" type="tel" id="senderPhone2"
+                                               name="senderPhone2" maxlength="4" value="1000"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                        <span style="margin-left: 1%; margin-right: 1%">-</span>
+                                        <input class="form-control input-lg input-phone" type="tel" id="senderPhone3"
+                                               name="senderPhone3" maxlength="4" value="0000"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                    </div>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr class="tr-border-top">
+                        <th scope="row">
+                            <label>연락처</label>
+                        <td>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-postcode" type="text"
+                                       id="senderPostcode"
+                                       name="senderPostcode"
+                                       value="07293" maxlength="30" readonly>
+
+                                <input id="btnReqSenderAddr" name="btnReqSenderAddr" type="button"
+                                       class="btn btn-primary button-type-1" value="우편번호 찾기">
+                            </div>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-address" type="text"
+                                       id="senderAddress"
+                                       name="senderAddress"
+                                       value="서울 영등포구 문래동3가 46" readonly>
+                            </div>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-address" type="text"
+                                       id="senderDetailAddress"
+                                       name="senderDetailAddress"
+                                       value="1404호">
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <%-- 받는 분 --%>
+            <div class="form-table">
+                <table>
+                    <colgroup>
+                        <col style="width: 25%">
+                        <col style="width: 75%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="row" colspan="2" class="pl-0 pr-0">
+                            <div class="table-top">
+                                <strong class="form-title">받는 분</strong>
+                            </div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="senderName">이름</label>
+                        <td>
+                            <input class="form-control input-lg input-name" type="text" id="receiverName"
+                                   name="receiverName" maxlength="30" value="테스터">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label>연락처</label>
+                        <td>
+                            <ul>
+                                <li style="display: list-item">
+                                    <div class="form-table-wrap mb-2">
+                                        <input class="form-control input-lg input-phone" type="tel" id="receiverPhone1"
+                                               name="receiverPhone1" maxlength="4" value="010"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                        <span style="margin-left: 1%; margin-right: 1">-</span>
+                                        <input class="form-control input-lg input-phone" type="tel" id="receiverPhone2"
+                                               name="receiverPhone2" maxlength="4" value="0000"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                        <span style="margin-left: 1%; margin-right: 1%">-</span>
+                                        <input class="form-control input-lg  input-phone" type="tel" id="receiverPhone3"
+                                               name="receiverPhone3" maxlength="4" value="1001"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');">
+                                    </div>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr class="tr-border-top">
+                        <th scope="row">
+                            <label>연락처</label>
+                        <td>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-postcode" type="text"
+                                       id="receiverPostcode"
+                                       name="receiverPostcode" value="07299" maxlength="30" readonly>
+
+                                <input id="btnReqReceiverAddr" name="btnReqReceiverAddr" type="button"
+                                       class="btn btn-primary button-type-1" value="우편번호 찾기">
+                            </div>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-address" type="text"
+                                       id="receiverAddress"
+                                       name="receiverAddress" value="서울 영등포구 문래동3가 55-20" readonly>
+                            </div>
+                            <div class="form-table-wrap">
+                                <input class="form-control input-lg input-type-1 input-address" type="text"
+                                       id="receiverDetailAddress"
+                                       name="receiverDetailAddress" value="303호">
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <%-- 배송 선택 --%>
+            <div class="form-table">
+                <table>
+                    <colgroup>
+                        <col style="width: 25%">
+                        <col style="width: 75%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th scope="row" colspan="2" class="pl-0 pr-0">
+                            <div class="table-top">
+                                <strong class="form-title">상세 정보</strong>
+                            </div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <%-- 몇 톤을 실을 것 인지 --%>
+                    <%-- 예상 가격 --%>
+                    <tr>
+                        <th scope="row">
+                            <label for="senderName">중량</label>
+                        <td>
+                            <div class="form-table-wrap">
+                                <select class="form-control" id="weight" name="weight"
+                                        style="width: 70%; margin-right: 2%">
+                                    <option value="0.5">0.5</option>
+                                    <option value="1">1</option>
+                                    <option value="1.5">1.5</option>
+                                    <option value="2">2</option>
+                                    <option value="2.5">2.5</option>
+                                </select>
+
+                                <label>톤</label>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <%-- 하단에서 택배를 신청하고 취소할 수 있는 버튼 --%>
+            <div class="div-result">
+                <input id="btnCancel" type="button" class="btn btn-outline-primary" value="취소하기"
+                       style="width: 45%">
+                <input id="btnApply" type="submit" class="btn btn-primary" value="예약 신청하기" style="width: 45%">
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

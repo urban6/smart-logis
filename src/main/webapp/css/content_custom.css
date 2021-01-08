@@ -1,0 +1,70 @@
+@charset "UTF-8";
+/*gnb*/
+/*form type_01 color */
+/*gnb, content*/
+/*gnb*/
+/*gnb, board*/
+/*gnb*/
+/*gnb*/
+/* btn type1 set */
+/* btn type1 primary */
+/* btn type2 set */
+/* btn type3 set */
+/* sprite img */
+/* tree color */
+/* search box / type1 */
+/* search box / type2 */
+/* popup */
+/* hgroup */
+
+
+/* GNB */
+.gnb .gnb_menu .dep_01 { position: relative; display: inline-block; padding: 0 5px; margin: 0 10px; }
+.gnb .gnb_menu .dep_01 > a, .gnb .gnb_menu .dep_01.view_all a, .gnb .gnb_menu .dep_01 .dep_01_a { position: relative; display: table-cell; height: 70px; vertical-align: middle; }
+.gnb .gnb_menu .dep_01 > a span, .gnb .gnb_menu .dep_01.view_all a span, .gnb .gnb_menu .dep_01 .dep_01_a span { overflow: hidden; display: inline-block; position: relative; height: 40px; line-height: 45px; font-size: 15px; font-weight: 600; color: #9fa2a6; z-index: 902; vertical-align: middle; }
+.gnb .gnb_menu .dropdown { display: none; overflow: hidden; position: absolute; top: 100%; left: -6px; max-height: 0px; margin-top: 0px; padding: 0px 0 7px 0; background-color: #2e2940; -webkit-border-radius: 0 0 5px 5px; border-radius: 0 0 5px 5px; -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.25); box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.25); opacity: 0; }
+.gnb .gnb_menu .dropdown li a { display: block; height: 30px; line-height: 28px; padding: 0 18px; font-size: 13px; color: #9fa2a6; vertical-align: middle; white-space: nowrap; }
+.gnb .gnb_menu .dropdown li:hover > a, .gnb .gnb_menu .dropdown li a:hover { color: #fff; background-color: #1e1a2c; }
+.gnb .gnb_menu .dropdown li a:active { color: #7a91ff; background-color: #1e1a2c; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a span { color: #fff; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active span, .gnb .gnb_menu .dep_01.active .dep_01_a span { color: #7a91ff; }
+.gnb .gnb_menu .dep_01.active > .dropdown, .gnb .gnb_menu .dep_01:hover > .dropdown, .gnb .gnb_menu .dep_02.active > .dropdown, .gnb .gnb_menu .dep_02:hover > .dropdown { display: block; overflow: visible; max-height: 600px; opacity: 1; }
+.gnb .gnb_menu .dep_02 { position: relative; }
+.gnb .gnb_menu .dep_02 a { position: relative; z-index: 1; }
+.gnb .gnb_menu .dep_02.has_child > a { padding-right: 26px; }
+.gnb .gnb_menu .dep_02.has_child > a:before { content: ''; position: absolute; top: 0; right: 0; display: inline-block; width: 30px; height: 30px; background: url("../images/icon_top_menu.png") -210px -560px no-repeat; }
+.gnb .gnb_menu .dep_02.has_child:hover > a:before { background-position: -260px -560px; }
+.gnb .gnb_menu .dep_02 .dropdown { top: 0; left: 100%; width: auto; margin-top: -3px; margin-left: -3px; padding: 3px 0 4px; -webkit-border-radius: 5px; border-radius: 5px; background: #2e2940; z-index: 2; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_01 { background-position: -9px -7px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_02 { background-position: -9px -57px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_03 { background-position: -9px -106px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_04 { background-position: -9px -157px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_05 { background-position: -9px -207px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_06 { background-position: -9px -257px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_07 { background-position: -9px -307px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_08 { background-position: -9px -357px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_09 { background-position: -9px -407px; }
+.gnb .gnb_menu .dep_01 .dep_01_a .icon.nth_10 { background-position: -9px -457px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_01 { background-position: -59px -7px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_02 { background-position: -59px -57px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_03 { background-position: -59px -106px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_04 { background-position: -59px -157px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_05 { background-position: -59px -207px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_06 { background-position: -59px -257px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_07 { background-position: -59px -307px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_08 { background-position: -59px -357px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_09 { background-position: -59px -407px; }
+.gnb .gnb_menu .dep_01:hover .dep_01_a .icon.nth_10 { background-position: -59px -457px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_01, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_01 { background-position: -109px -9px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_02, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_02 { background-position: -109px -59px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_03, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_03 { background-position: -109px -109px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_04, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_04 { background-position: -109px -159px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_05, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_05 { background-position: -109px -209px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_06, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_06 { background-position: -109px -259px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_07, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_07 { background-position: -109px -309px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_08, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_08 { background-position: -109px -359px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_09, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_09 { background-position: -109px -409px; }
+.gnb .gnb_menu .dep_01 .dep_01_a:active .icon.nth_10, .gnb .gnb_menu .dep_01.active .dep_01_a .icon.nth_10 { background-position: -109px -459px; }
+.gnb .gnb_menu .dep_01.view_all a .icon { background-position: -209px -9px; }
+.gnb .gnb_menu .dep_01.view_all a:hover .icon { background-position: -259px -9px; }
+.gnb .gnb_menu .dep_01.view_all a:active .icon { background-position: -309px -9px; }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.signUp.SignUpMapper">
+
+    <!-- 회원가입 여부를 확인한다. -->
+    <select id="searchLoginId" parameterType="string" resultType="string">
+        SELECT USER_UID
+        FROM logis_user
+        WHERE LOGIN_ID = #{loginId};
+    </select>
+
+    <!-- 회원을 추가한다. -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="userUid"
+            parameterType="kr.co.shovvel.dm.domain.logis.user.LogisUser">
+        INSERT INTO logis_user(LOGIN_ID, PASSWD, COMPANY_NAME, POSTCODE, ADDRESS, MANAGER_NAME, PHONE_NUMBER, STATUS, SIGN_UP_DATE)
+        VALUES (#{loginId}, #{passwd}, #{companyName}, #{postcode}, #{address}, #{managerName}, #{phoneNumber}, 'Y', NOW());
+    </insert>
+
+</mapper>

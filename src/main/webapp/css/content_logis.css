@@ -1,0 +1,59 @@
+/* 로딩바 */
+.loading {
+    width: 500px;
+    height: 100%;
+    position:fixed;
+    background-color: #0e2f91;
+    z-index: 9999;
+    display: flex;
+}
+
+body {
+    background-color: #f3f3f3;
+    font-family: 'Nanum Gothic', sans-serif;
+}
+
+.input-box {
+    border: 0;
+}
+
+.input-box::placeholder {
+    color: #DCDCDC;
+}
+
+.btn-logis-white {
+    background: #FFFFFF;
+    padding: 3%;
+    border: 0;
+    border-radius: 6px;
+}
+
+.btn-logis-primary {
+    border: 0;
+    background-color: #0E2F91;
+    color: white;
+}
+
+.btn-logis-primary:hover {
+    color: lightgrey;
+}
+
+.btn-logis-outline-primary {
+    width: 90%;
+    background: #FFFFFF;
+    margin: 0 auto;
+    border: 1px solid #0E2F91;
+    color: #0E2F91;
+    padding: 3%;
+    border-radius: 6px;
+}
+
+.input-logis-login {
+    background-color: #3E58A7;
+    border: 1px solid white;
+    color: white;
+}
+
+.input-taxi-login::placeholder {
+    color: #E0E0E0;
+}

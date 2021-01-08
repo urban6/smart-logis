@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.manager.ManagerMapper">
+
+	<!-- 관리자 관리 > 리스트(갯수) -->
+	<select id="selectManagerListCnt" resultType="int">
+		<![CDATA[
+			SELECT
+			    COUNT(0) AS CNT
+			FROM
+				ONC_MNG_DATA
+			WHERE
+				( MNG_TP='A' OR MNG_TP='S')  
+				]]>	
+			    <if test="condition.search_str not in {null, ''}">
+			        <choose>
+			        	<when test="condition.search_type not in {null, ''}"><![CDATA[ AND ${condition.search_type} LIKE CONCAT('%', #{condition.search_str}, '%') ]]></when>
+			        	<otherwise><![CDATA[ AND (MNG_ID LIKE CONCAT('%', #{condition.search_str}, '%') OR MNG_NM LIKE CONCAT('%', #{condition.search_str}, '%')) ]]></otherwise>
+			        </choose>
+			    </if>
+				<![CDATA[
+		]]>
+	</select>
+
+	<!-- 관리자 관리 > 리스트 -->
+	<select id="selectManagerList" resultType="kr.co.shovvel.dm.domain.management.manager.ManagerDomain">
+		<![CDATA[
+			SELECT CONCAT(RowAsc) AS NUM_ASC, CONCAT(RowDesc) AS NUM_DESC, resultQuery.* FROM (
+				SELECT descData.*, (@numDesc:=@numDesc+1) AS RowDesc FROM (	
+					SELECT numAscQuery.* FROM (
+						SELECT ascData.*, (@numAsc:=@numAsc+1) AS RowAsc FROM (
+							SELECT baseQuery.* FROM (
+								SELECT
+									*
+								FROM
+									ONC_MNG_DATA
+								WHERE
+									( MNG_TP='A' OR MNG_TP='S')  
+									]]>	
+								    <if test="condition.search_str not in {null, ''}">
+								    	<choose>
+								    		<when test="condition.search_type not in {null, ''}"><![CDATA[ AND ${condition.search_type} LIKE CONCAT('%', #{condition.search_str}, '%') ]]></when>
+								    		<otherwise><![CDATA[ AND (MNG_ID LIKE CONCAT('%', #{condition.search_str}, '%') OR MNG_NM LIKE CONCAT('%', #{condition.search_str}, '%')) ]]></otherwise>
+								    	</choose>
+								    </if>	
+									<![CDATA[
+								ORDER BY 
+									SEQ DESC
+								) baseQuery JOIN (SELECT @numAsc:=0) numAscSet
+							) ascData
+						ORDER BY 
+							SEQ DESC
+					) numAscQuery JOIN (SELECT @numDesc:=0) numDescSet
+				) descData ORDER BY RowAsc DESC
+			) resultQuery
+			WHERE resultQuery.RowAsc BETWEEN #{condition.startRow} AND #{condition.endRow}
+			ORDER BY RowAsc ASC
+		]]>
+	</select>
+
+	<!-- 관리자 관리 > 아이디 유무 조회-->
+	<select id="selectMngIdCnt" resultType="int">
+		<![CDATA[
+			SELECT
+				COUNT(0) AS CNT
+			FROM
+				ONC_MNG_DATA
+			WHERE
+				MNG_ID = #{condition.mng_id}
+		]]>
+	</select>
+	
+	<!-- 관리자 관리 > 등록하기-->
+	<insert id="insertManager">
+		<![CDATA[
+			INSERT INTO ONC_MNG_DATA (
+				MNG_TP,
+				MNG_ID,
+				MNG_PWD,
+				MNG_NM,
+				MNG_MOBILE,
+				MNG_PHONE,
+				MNG_EMAIL,
+				MNG_BELONG,
+				MNG_MSG,
+				MNG_POWER,
+				USED_YN,	
+				REG_DT	
+			) VALUES (
+				'A',
+				#{condition.mng_id},
+				MD5(#{condition.mng_pwd}),
+				#{condition.mng_nm},
+				#{condition.mng_mobile},
+				#{condition.mng_phone},
+				#{condition.mng_email},
+				#{condition.mng_belong},
+				#{condition.mng_msg},
+				#{condition.mng_power},
+				'Y',	
+				SYSDATE()
+			)
+		]]>
+	</insert>
+	
+	<!-- 관리자 관리 > 상세보기-->
+	<select id="selectManagerDetail" resultType="kr.co.shovvel.dm.domain.management.manager.ManagerDomain">
+		<![CDATA[
+			SELECT
+			    *
+			FROM
+			    ONC_MNG_DATA
+			WHERE
+			    SEQ = #{condition.seq}
+		]]>
+	</select>
+	
+	<!-- 관리자 관리 > 사용여부 변경-->
+	<insert id="updateUsedYn">
+		<![CDATA[
+			UPDATE ONC_MNG_DATA SET	
+				USED_YN = #{condition.used_yn}	
+			WHERE
+				SEQ = #{condition.seq}
+		]]>
+	</insert>
+
+	<!-- 관리자 관리 > 수정하기-->
+	<update id="updateManager">
+		<![CDATA[
+			UPDATE ONC_MNG_DATA SET
+				]]>	<if test="condition.mng_pwd not in {null, ''}"><![CDATA[ 
+				MNG_PWD = MD5(#{condition.mng_pwd}),	
+				]]></if><![CDATA[ 
+				MNG_NM = #{condition.mng_nm},
+				MNG_MOBILE = #{condition.mng_mobile},
+				MNG_BELONG = #{condition.mng_belong}
+				]]>	<if test="condition.mng_power not in {null, ''}"><![CDATA[
+				 ,MNG_POWER = #{condition.mng_power}
+				]]></if><![CDATA[
+			WHERE
+				SEQ = #{condition.seq}
+		]]>
+	</update>
+
+
+</mapper>

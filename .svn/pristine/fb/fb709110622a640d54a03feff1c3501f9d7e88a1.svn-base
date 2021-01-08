@@ -1,0 +1,12 @@
+﻿<HTML>
+<script type="text/javascript">
+function clickImage(obj){
+	
+	window.open(obj.src, '_target');
+}
+</script>
+<BODY style='margin:0; padding:0;'>
+	<img width='100%' src='_IMG_FILE_SRC_' style='display:_IMG_FILE_DISPLAY_' onclick='javascript:clickImage(this);'>
+_EVENT_CTNT_
+</BODY>
+</HTML>

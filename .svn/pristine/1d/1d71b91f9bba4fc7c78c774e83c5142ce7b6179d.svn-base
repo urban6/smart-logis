@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration PUBLIC 
+	"-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="FileLog" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="${catalina.base}/logs/oncoach-mng.log" />
+		<param name="DatePattern" value="'-'yyyyMMdd" />
+		<param name="Append" value="true" />
+		<!-- <param name="maxFileSize" value="10MB" /> <param name="maxBackupIndex" value="10" /> -->
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] *%-5p* - %m - (%F, line %L)%n" />
+		</layout>
+	</appender>
+	
+	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] %-5p - %C{1}: %m%n" /> -->
+			<!-- <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] *%-5p* - %c{1} - %m - (%F, line %L)%n" /> -->
+			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] *%-5p* - %m - (%F, line %L)%n" />
+		</layout>
+	</appender>
+		
+	<!-- special treatment for all logging activities of the jWebSocket framework -->
+	
+	<logger name="kr.co.shovvel.dm" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Console"/>
+	</logger>	
+	<logger name="kr.co.shovvel.dm.interceptor" additivity="false">
+		<level value="ERROR" />
+		<appender-ref ref="Console"/>
+	</logger>
+	<logger name="kr.co.shovvel.dm.dao" additivity="false">
+		<level value="ERROR" />
+	</logger>
+	
+	<logger name="kr.co.shovvel.hcf" additivity="false">
+		<level value="ERROR" />
+		<appender-ref ref="Console"/>
+	</logger>
+	
+	<logger name="jdbc.sqlonly" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="Console"/>
+	</logger>
+	
+	<logger name="jdbc.resultsettable" additivity="false">
+        <level value="ERROR" />
+		<appender-ref ref="Console"/>
+    </logger>    
+ 
+    <logger name="jdbc.sqltiming" additivity="false">
+        <level value="ERROR" />
+		<appender-ref ref="Console"/>
+    </logger>
+ 
+    <logger name="jdbc.audit" additivity="false">
+    	<level value="OFF" />
+		<appender-ref ref="Console"/>
+    </logger>
+ 
+    <logger name="jdbc.connection" additivity="false">
+        <level value="ERROR" />
+		<appender-ref ref="Console"/>
+    </logger>
+ 
+
+	<!-- default level: TRACE, DEBUG, INFO, WARN, ERROR or FATAL -->  
+	<root>
+		<level value="DEBUG" />
+		<appender-ref ref="FileLog" />
+	</root>
+ 
+</log4j:configuration>

@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.login.PrevLoginMapper">
+
+	<resultMap id="userResult" type="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+		<result property="userSno" 			column="USER_SNO" />
+		<result property="partnerSno"		column="PARTNER_SNO" />
+		<result property="partnerClcd"		column="PARTNER_CLCD" />
+		<result property="loginId" 			column="LOGIN_ID" />
+		<result property="sessionId" 		column="SESSION_ID" />
+		<result property="levelId" 			column="LEVEL_ID" />
+		<result property="userFnm" 			column="USER_FNM" />
+		<result property="userEmail" 		column="USER_EMAIL" />
+		<result property="userPhone" 		column="USER_PHONE" />
+		<result property="lastLoginDate" 	column="LAST_LOGIN_DATE" />
+		<result property="status" 			column="STATUS" />
+		<result property="retryCount"		column="RETRY_COUNT" />
+		<result property="levelName" 		column="LEVEL_NAME" />
+		<result property="sessionId" 		column="SESSION_ID" />
+		<result property="loginType" 		column="LOGIN_TYPE" />
+		<result property="loginCount" 		column="LOGIN_COUNT" />
+		<result property="lockType" 		column="LOCK_TYPE" />
+		<result property="lockTime" 		column="LOCK_TIME" />
+		<result property="passwdExfire" 	column="PASSWD_EXFIRE" />
+		<result property="accountExfire"	column="ACCOUNT_EXFIRE" />
+		<result property="absentLockDay"	column="ABSENT_LOCK_DAY" />
+		<result property="absentLock"		column="ABSENT_LOCK" />
+		<result property="defaultPasswdYn"	column="DEFAULT_PASSWD_YN" />
+		<result property="initPasswdYn"		column="PASSWD_INIT_YN" />
+		<result property="passwdLifeCycle"	column="PASSWD_LIFE_CYCLE" />
+	</resultMap>
+
+	<resultMap id="ipBandwidthResult" type="kr.co.shovvel.dm.domain.management.login.IpBandwidth">
+		<result property="ipManagerNo" 		column="IP_MANAGER_NO" />
+		<result property="ip" 				column="IP" />
+		<result property="maxSimult" 		column="MAX_SIMULT" />
+		<result property="allowYn" 			column="ALLOW_YN" />
+		<result property="description" 		column="DESCRIPTION" />
+		<result property="sessionCnt" 		column="SESSION_CNT" />
+	</resultMap>
+
+	<!--
+		* 유저 아이디 존재 유무
+	-->
+	<select id="countUser" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countUser */
+               COUNT(*)
+            FROM ONC_COM_USER
+           WHERE BINARY(LOGIN_ID) = #{loginId}
+    </select>
+
+	<!--
+		* 접속 유저 수
+	-->
+    <select id="countLoginSession" resultType="int">
+        SELECT /* LoginMapper.countLoginSession */
+               COUNT(*)
+            FROM ONC_COM_USER_RECENT_SESSION
+           WHERE STATUS 			= 'Y' /* 현재 로그인한 사용자 */
+    </select>
+
+    <!--
+    	* 사용자 계정 잠김 여부 조회
+    -->
+    <select id="searchAccountLock" parameterType="string" resultType="string">
+        SELECT /* LoginMapper.searchAccountLock */
+               STATUS
+            FROM ONC_COM_USER
+           WHERE USER_SNO = #{userSno}
+    </select>
+
+    <!--
+    	* 사용자 계정의 로그인 세션이 유효한지 검사
+    -->
+    <select id="isValidUser" parameterType="string" resultType="string">
+		SELECT /* LoginMapper.isValidUser */
+		       IFNULL(MAX(STATUS),'N')
+		  FROM ONC_COM_USER_RECENT_SESSION				US
+		 WHERE 1=1
+		   AND US.USER_SNO					= #{userSno}
+		   AND US.SESSION_ID				= #{sessionId}
+    </select>
+
+    <select id="searchUserInfo" parameterType="string" resultMap="userResult">
+        SELECT /* LoginMapper.searchUserInfo */
+               TU.LAST_LOGIN_DATE
+             , TU.RETRY_COUNT /* 로그인 재시도 횟수  */
+             , TUL.LOCK_TYPE
+             , TUL.LOCK_TIME
+          FROM ONC_COM_USER				TU
+             , ONC_COM_USER_LEVEL		TUL
+         WHERE 1=1
+           AND TU.USER_SNO 	= #{userSno}
+           AND TU.LEVEL_ID			= TUL.LEVEL_ID
+    </select>
+
+    <!-- 로그인시 로그인에 해당하는 userSno 조회 -->
+    <select id="selectUserSno" parameterType="string" resultMap="userResult">
+    	SELECT A.USER_SNO
+             , A.LOGIN_ID
+             , A.LEVEL_ID
+          FROM ONC_COM_USER A
+         WHERE 1=1
+           AND BINARY(A.LOGIN_ID) = #{loginId}
+           AND A.STATUS 		 = 'Y'
+			<!--  AND A.STATUS 		 = 'Y' /* Y:정상, N:삭제, L:계정잠금(LOCK) */  -->
+    </select>
+	<!--
+		* 사용자 정보 조회
+		-->
+    <select
+    	id="searchLoginUserInfo" parameterType="string" resultMap="userResult">
+        SELECT /* LoginMapper.searchLoginUserInfo */
+               A.USER_SNO
+             , A.PARTNER_SNO
+             , '' AS PARTNER_CLCD
+             , A.LOGIN_ID
+             , A.USER_FNM
+             , (SELECT LEVEL_TITLE
+                    FROM ONC_COM_USER_LEVEL
+                   WHERE LEVEL_ID = A.LEVEL_ID) 	AS LEVEL_NAME
+             , A.LEVEL_ID
+             , A.RETRY_COUNT
+             , A.LAST_LOGIN_DATE
+             , A.STATUS
+             , IFNULL(B.LOCK_TYPE,'M')				LOCK_TYPE
+             , IFNULL(B.ABSENT_LOCK_DAY,10*365)		AS ABSENT_LOCK_DAY
+             , CASE WHEN
+             	DATE_ADD(IFNULL(A.LAST_LOGIN_DATE,NOW()), INTERVAL IFNULL(B.ABSENT_LOCK_DAY,10*365) DAY) <![CDATA[<]]> NOW()
+             		THEN 'L'
+             		ELSE 'Y'
+               END									ABSENT_LOCK
+             , A.DEFAULT_PASSWD_YN
+             , A.PASSWD_INIT_YN
+             , B.PASSWD_LIFE_CYCLE
+             <!-- , (SELECT GROUP_CONCAT(GROUP_NO) FROM COM_USER_UG WHERE USER_SNO = A.USER_SNO) AS GROUP_NO -->
+             , NULL AS GROUP_NO
+          FROM ONC_COM_USER 								A
+             , ONC_COM_USER_LEVEL						B
+         WHERE 1=1
+           AND A.USER_SNO 					= #{userSno}
+           AND A.PASSWD  							= #{password}
+           AND A.STATUS 							= 'Y' /* Y:정상, N:삭제, L:계정잠금(LOCK) */
+           AND A.LEVEL_ID							= B.LEVEL_ID
+            /* AND A.USER_FLAG = 'Y' */
+    </select>
+
+	<!--
+		* 중복 접속 유저인지 조회
+		 -->
+	<select id="searchLoginSessionUser" parameterType="string" resultMap="userResult">
+        SELECT /* LoginMapper.searchLoginSessionUser */
+               U.USER_SNO
+             , IFNULL(U.LOGIN_TYPE,1)		LOGIN_TYPE
+             , IFNULL(U.LOGIN_COUNT,0)		LOGIN_COUNT
+             , U.STATUS
+             , U.RETRY_COUNT
+             , U.PASSWD_EXFIRE
+             , U.ACCOUNT_EXFIRE
+             , UL.LOCK_TYPE
+          FROM ONC_COM_USER						U
+             , ONC_COM_USER_LEVEL				UL
+         WHERE 1=1
+           AND BINARY(U.USER_SNO) 			= #{userSno}
+           AND U.LEVEL_ID					= UL.LEVEL_ID
+           /* "접속 경로(DEFAULT은  '0')
+			- 웹(client) '0', 커맨트 CLI(=서버) '1'
+			- 웹(client)만 강제 종료 가능"
+            */
+    </select>
+
+    <!--
+    	*  User 테이블에 마지막 날짜 업데이트
+    -->
+    <update id="updateLastLoginDate" parameterType="string">
+        UPDATE /* LoginMapper.updateLastLoginDate */
+               ONC_COM_USER
+           SET LAST_LOGIN_DATE 	= NOW()
+             , LOGIN_COUNT		= LOGIN_COUNT + 1
+             , LAST_LOGIN_IP	= #{remoteAddress}
+         WHERE USER_SNO 	= #{userSno}
+    </update>
+
+	<!--
+    	*  User 테이블에 LOGIN_FAIL_COUNT 0 으로 업데이트
+    	-->
+    <update id="updateZeroLoginFailCount" parameterType="string">
+        UPDATE /* LoginMapper.updateZeroLoginFailCount */
+               ONC_COM_USER
+           SET RETRY_COUNT = 0
+             , LAST_LOGIN_DATE 		= NOW()
+         WHERE 1=1
+           AND USER_SNO 		= #{userSno}
+    </update>
+
+	<!--
+    	*  User 테이블에 LOGIN_FAIL_COUNT 0 으로 업데이트
+    	-->
+    <update id="updatePassword" parameterType="string">
+        UPDATE /* LoginMapper.updatePassword */
+               ONC_COM_USER
+           SET PASSWD 				= #{passwd}
+             , DEFAULT_PASSWD_YN	= #{defaultPasswordYn}
+             , PASSWD_EXFIRE		= DATE_FORMAT(
+										DATE_ADD(NOW(), INTERVAL #{passwdLifeCycle} DAY )
+             							,'%Y%m%d')
+         WHERE 1=1
+           AND BINARY(USER_SNO) 		= #{userSno}
+
+
+    </update>
+    <!-- AND DATE_FORMAT(DATE_ADD(PASSWD_EXFIRE,INTERVAL - (SELECT PASSWD_NOTI_DAY FROM COM_MANAGEMENT_LEVEL WHERE LEVEL_ID = (SELECT X.LEVEL_ID FROM COM_USER X WHERE X.USER_SNO = #{userSno})) DAY), '%Y%m%d') <![CDATA[<]]> DATE_FORMAT(NOW(), '%Y%m%d') -->
+	<!--
+		* 로그인 실패 카운터 업데이트
+	-->
+    <update id="updateLoginFailCount" parameterType="string">
+        UPDATE /* LoginMapper.updateLoginFailCount */
+               ONC_COM_USER
+           SET RETRY_COUNT 			= RETRY_COUNT + 1
+         WHERE 1=1
+           AND USER_SNO 		= #{userSno}
+    </update>
+
+	<!--
+		* 로그인 실패 카운터 업데이트
+	-->
+    <update id="updateLoginFailCountDate" parameterType="string">
+        UPDATE /* LoginMapper.updateLoginFailCount */
+               ONC_COM_USER
+           SET RETRY_COUNT 			= RETRY_COUNT + 1
+             , LAST_LOGIN_DATE 		= NOW()
+         WHERE 1=1
+           AND USER_SNO 		= #{userSno}
+    </update>
+
+	<!--
+		* 패스워드 만료 컬럼 널(null)여부 체크
+		 -->
+	<select id="countNullPasswordDate" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countNullPasswordDate */
+               COUNT(*)
+          FROM ONC_COM_USER
+         WHERE USER_SNO = #{userSno}
+           AND (TRIM(PASSWD_EXFIRE) IS NULL OR TRIM(PASSWD_EXFIRE) = '')
+    </select>
+
+	<!--
+		* 패스워드 기한 만료
+		 -->
+    <select id="countNotiPasswordDate" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countNotiPasswordDate */
+               COUNT(*)
+          FROM ONC_COM_USER
+         WHERE USER_SNO = #{userSno}
+           AND DATE_FORMAT(DATE_ADD(PASSWD_EXFIRE,INTERVAL - (SELECT PASSWD_NOTI_DAY FROM ONC_COM_USER_LEVEL WHERE LEVEL_ID = (SELECT X.LEVEL_ID FROM ONC_COM_USER X WHERE X.USER_SNO = #{userSno})) DAY), '%Y%m%d') <![CDATA[<]]> DATE_FORMAT(NOW(), '%Y%m%d')
+    </select>
+
+	<!--
+		* 계정 만료 컬럼 널(null)여부 체크
+		 -->
+	<select id="countNullAccountDate" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countNullAccountDate */
+               COUNT(*)
+          FROM ONC_COM_USER
+         WHERE USER_SNO = #{userSno}
+           AND (TRIM(ACCOUNT_EXFIRE) IS NULL OR TRIM(ACCOUNT_EXFIRE) = '')
+    </select>
+
+	<!--
+		* 계정 기한 만료
+	-->
+    <select id="countOverAccountDate" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countOverAccountDate */
+               COUNT(*)
+          FROM ONC_COM_USER
+         WHERE USER_SNO = #{userSno}
+           AND DATE_FORMAT(ACCOUNT_EXFIRE, '%Y%m%d') <![CDATA[<]]> DATE_FORMAT(NOW(), '%Y%m%d')
+    </select>
+
+    <!--
+    	* 계정 만료전 노티 해줌
+    -->
+    <select id="countNotiAccountDate" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countNotiAccountDate */
+               COUNT(*)
+          FROM ONC_COM_USER
+         WHERE USER_SNO = #{userSno}
+           AND DATE_FORMAT(DATE_ADD(ACCOUNT_EXFIRE,INTERVAL - (SELECT ACCOUNT_NOTI_DAY FROM ONC_COM_USER_LEVEL WHERE LEVEL_ID = (SELECT X.LEVEL_ID FROM ONC_COM_USER X WHERE X.USER_SNO = #{userSno}) ) DAY), '%Y%m%d') <![CDATA[<]]> DATE_FORMAT(NOW(), '%Y%m%d')
+    </select>
+
+    <!-- 로그인 실패 카운트 ONOFF 체크 -->
+    <select id="searchLoginFailCheckYN" parameterType="string" resultType="string">
+        SELECT /* LoginMapper.searchLoginFailCheck */
+               MAX_WRONG_PASSWD_YN
+        FROM ONC_COM_USER_LEVEL
+        WHERE LEVEL_ID = (SELECT LEVEL_ID
+           	FROM ONC_COM_USER
+           	WHERE USER_SNO = #{userSno})
+    </select>
+
+	<!--
+		* 로그인 실패 카운터 조회
+	-->
+    <select id="searchLoginFailCount" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.searchLoginFailCount */
+               IFNULL(MAX(RETRY_COUNT),-1) AS RETRY_COUNT
+            FROM ONC_COM_USER
+           WHERE USER_SNO = #{userSno}
+    </select>
+
+	<!--
+		*로그인 실패 최대 카운터 조회
+	-->
+    <select id="searchLoginFailLimit" parameterType="string" resultType="int">
+        SELECT /* LoginMapper."searchLoginFailLimit" */
+               IFNULL(MAX(MAX_WRONG_PASSWD),-1)
+          FROM ONC_COM_USER 		TU
+             , ONC_COM_USER_LEVEL	TUL
+         WHERE 1=1
+           AND USER_SNO 	= #{userSno}
+           AND TU.LEVEL_ID		= TUL.LEVEL_ID
+    </select>
+
+    <!--
+    	* 계정 락을 건다
+    	-->
+    <update id="updateAccountLock" parameterType="string">
+        UPDATE /* LoginMapper.updateAccountLock */
+               ONC_COM_USER
+           SET STATUS 				= #{status}
+             , STATUS_REASON		= #{statusReason}
+             , LAST_LOGIN_DATE 		= NOW()
+         WHERE USER_SNO 		= #{userSno}
+    </update>
+
+    <!--
+    	* 세션 유저 상태값 조회
+     	-->
+    <select id="countLoginSessionUser" parameterType="string" resultType="int">
+        SELECT /* LoginMapper.countLoginSessionUser */
+               COUNT(*)
+            FROM ONC_COM_USER_RECENT_SESSION
+           WHERE USER_SNO 	= #{userSno}
+             AND SESSION_ID 		= #{sessionId}
+             AND GATEWAY_IP 		= #{remoteAddress} /*접속중인 IP*/
+             AND STATUS				= 'Y'
+    </select>
+
+    <!--
+		* 세션 유저 상태값 입력
+	-->
+    <update id="insertLoginSessionUser"
+            parameterType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+        INSERT /* LoginMapper.insertLoginSessionUser */
+               INTO ONC_COM_USER_RECENT_SESSION (
+             USER_SNO
+           , SESSION_ID
+           , GATEWAY_IP
+           , STATUS
+           , CNT
+        ) VALUES (
+             #{userSno}
+           , #{sessionId}
+           , #{gatewayIp}
+           , #{status}
+           , #{cnt}
+        )
+    </update>
+
+	<!--
+		* 세션 유저 상태값 업데이트
+	-->
+    <update id="updateLoginSessionUser" parameterType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+        UPDATE /* LoginMapper.updateLoginSessionUser */
+               ONC_COM_USER_RECENT_SESSION SET
+            STATUS = #{status}
+           WHERE USER_SNO = #{userSno}
+             AND GATEWAY_IP = #{gatewayIp}
+             AND SESSION_ID = #{sessionId}
+    </update>
+
+	<!--
+		* 세션 유저 로그아웃 처리
+	-->
+    <update id="destoryLogin" parameterType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+        UPDATE /* LoginMapper.userDestoryHistory */
+               ONC_COM_USER_RECENT_SESSION
+           SET STATUS = 'N'
+         WHERE BINARY(USER_SNO) 	= #{userSno}
+           AND SESSION_ID 		= #{sessionId}
+    </update>
+
+	<!--
+		* 계정 만료 남은 일수 조회
+		 -->
+	<select id="searchAccountDueDate" parameterType="string" resultType="int">
+		SELECT /* LoginMapper.searchAccountDueDate */
+               IFNULL(D_DAY, 0) + 1
+		    FROM (SELECT TO_DAYS(DATE_FORMAT(ACCOUNT_EXFIRE, '%Y%m%d')) - TO_DAYS(NOW()) AS D_DAY
+                      FROM ONC_COM_USER
+                     WHERE USER_SNO = #{userSno}
+                 )TBL
+    </select>
+
+    <!--
+    	* 패스워드 만료 남은 일수 조회
+    	 -->
+    <select id="searchPasswordDueDate" parameterType="string" resultType="int">
+    	SELECT /* LoginMapper.searchPasswordDueDate */
+               IFNULL(D_DAY, 0) + 1
+		    FROM (SELECT TO_DAYS(DATE_FORMAT(PASSWD_EXFIRE, '%Y%m%d')) - TO_DAYS(NOW()) AS D_DAY
+                      FROM ONC_COM_USER
+                     WHERE USER_SNO = #{userSno}
+                 )TBL
+    </select>
+
+	<!-- 패스워드 오류로 LOCK된 후 LOCK_TIME이 지나면 Y, 아직 지나지 않았으면 L -->
+	<select id="validLockTime" resultType="string">
+		SELECT /* LoginMapper.validLockTime */
+		       CASE WHEN TU.LAST_LOGIN_DATE <![CDATA[<]]> DATE_ADD(NOW(), INTERVAL -1*TUL.LOCK_TIME MINUTE)
+					THEN 'Y' 	/* 시간 경과됨 */
+					ELSE 'L' 	/* 시간 경과안됨 */
+				 END
+		  FROM ONC_COM_USER				TU
+		     , ONC_COM_USER_LEVEL		TUL
+		 WHERE 1=1
+		   AND TU.USER_SNO			= #{userSno}
+		   AND TU.LEVEL_ID			= TUL.LEVEL_ID
+	</select>
+
+	<!--
+		* 아이피 대역 리스트
+	-->
+	<select id="listIpBandwidth" parameterType="string" resultMap="ipBandwidthResult">
+        SELECT /* LoginMapper.listIpBandwidth */
+               IP_MANAGER_NO
+             , IP
+             , ALLOW_YN
+             , MAX_SIMULT
+             , DESCRIPTION
+		     , ( SELECT COUNT(1)
+		           FROM ONC_COM_USER_RECENT_SESSION
+		          WHERE IP_BANDWIDTH 	= IP
+		            AND STATUS			= 'Y'
+		       ) 						SESSION_CNT
+          FROM COM_IP_MANAGER
+         WHERE 1=1
+           AND ALLOW_YN					= #{allowYn}
+    </select>
+
+
+
+
+
+	<!--
+		* JUnit 테스트를 위한 ONC_COM_USER update
+		* 테스트하는 쪽에서 auto rollback 되어야 함.
+	-->
+    <update id="updateTATUSERForTest" parameterType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+        UPDATE /* LoginMapper.updateTATUSERForTest */
+               ONC_COM_USER
+           SET USER_FNM		= USER_FNM
+             <if test="status != null and status != ''">
+             , STATUS			= #{status}
+             </if>
+             <if test="retryCount != null">
+             , RETRY_COUNT		= #{retryCount}
+             </if>
+             <if test="loginType != null and loginType != ''">
+             , LOGIN_TYPE		= #{loginType}
+             </if>
+             <if test="loginType != null and loginType != ''">
+             , LOGIN_COUNT		= #{loginCount}
+             </if>
+             <if test="accountExfire != null and accountExfire != ''">
+             , ACCOUNT_EXFIRE	= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL #{accountExfire} DAY),'%Y%m%d')
+             </if>
+             <if test="passwdExfire != null and passwdExfire != ''">
+             , PASSWD_EXFIRE	= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL #{passwdExfire} DAY),'%Y%m%d')
+             </if>
+             <if test="lastLoginDate != null and lastLoginDate != ''">
+             , LAST_LOGIN_DATE	= DATE_ADD(NOW(), INTERVAL -1*#{lastLoginDate} MINUTE)
+             </if>
+             <if test="defaultPasswdYn != null and defaultPasswdYn != ''">
+             , DEFAULT_PASSWD_YN	= #{defaultPasswdYn}
+             </if>
+         WHERE BINARY(USER_SNO) 	= #{userSno}
+    </update>
+
+
+	<!--
+		* JUnit 테스트를 위한 COM_MANAGEMENT_LEVEL update
+		* 테스트하는 쪽에서 auto rollback 되어야 함.
+	-->
+    <update id="updateTATUSERLEVELForTest" parameterType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+        UPDATE /* LoginMapper.updateTATUSERLEVELForTest */
+               ONC_COM_USER_LEVEL
+           SET LEVEL_TITLE 			= LEVEL_TITLE
+             <if test="exfireNotiDay != null and exfireNotiDay != ''">
+             , EXFIRE_NOTI_DAY		= #{exfireNotiDay}
+             </if>
+             <if test="passwdNotiDay != null and passwdNotiDay != ''">
+             , PASSWD_NOTI_DAY		= #{passwdNotiDay}
+             </if>
+             <if test="maxWrongPasswd != null and maxWrongPasswd != ''">
+             , MAX_WRONG_PASSWD		= #{maxWrongPasswd}
+             </if>
+             <if test="lockType != null and lockType != ''">
+             , LOCK_TYPE			= #{lockType}
+             </if>
+             <if test="lockTime != null and lockTime != ''">
+             , LOCK_TIME			= #{lockTime}
+             </if>
+             <if test="absentLockDay != null and absentLockDay != 0">
+             , ABSENT_LOCK_DAY		= #{absentLockDay}
+             </if>
+         WHERE 1=1
+           AND LEVEL_ID				= (SELECT LEVEL_ID FROM ONC_COM_USER WHERE USER_SNO = #{userSno})
+    </update>
+
+	<select id="listRegistedUser" resultType="kr.co.shovvel.dm.domain.management.login.LoginDomain">
+		SELECT	/* LoginMapper.listRegistedUser */
+		        CU.USER_SNO				as userSno,			/* 사용자 순번 */
+		        CU.USER_FNM				as userFnm,			/* 사용자 명 */
+		        CU.LOGIN_ID				as loginId,			/* 사용자 로그인 ID */
+		        CU.BRDY                 as brdy
+		FROM	ONC_COM_USER	CU			/* 사용자 관리 */
+		WHERE	USE_YN = 'Y'
+		AND		CU.LOGIN_ID = #{loginId}
+	</select>
+
+	<!-- OTP SMS전송처리 -->
+	<insert id="sendSmsPartnerAdminCertCode">
+       INSERT INTO COM_SMS_SEND_HIST
+       	(	RECEIVE_USER_SERVICE_USE_SNO
+       		, SMS_GRP_SNO
+       		, SMS_MSG_CTCD
+       		, RECEIVE_HP_NO
+       		, SMS_MSG_CTNT
+       		, SMS_MSG_SEND_FINISH_YN
+		    , SMS_MSG_SEND_DT
+       		, INS_DT
+       		, INS_USER_SNO
+       		, UPD_DT
+       		, UPD_USER_SNO	)
+		SELECT	USER_SNO
+		    		, #{msgSendGroupSno}
+		    		, #{msgCtcd}
+		    		, USER_HP_NO
+		    		, #{msgCtnt}
+		    		, 'N'
+		    		, DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
+		    		, NOW()
+					, #{userSno}
+					, NOW()
+					, #{userSno}
+		FROM 	ONC_COM_USER
+		WHERE 	USER_SNO = #{userSno}
+	</insert>
+
+</mapper>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.management.ManagementMapper">
+
+    <!-- 사용자가 입력한 아이디와 비밀번호가 맞는지 확인한다. -->
+    <select id="searchLogisUser" parameterType="string" resultType="string">
+        SELECT LOGIS_NUMBER
+        FROM logis
+        WHERE LOGIS_NUMBER = #{logisNumber} AND PASSWD = #{passwd}
+    </select>
+
+    <!-- 본인인증 단계가 완료되었을 때, 로그인 데이터를 추가한다. -->
+    <insert id="addDriverLogin" parameterType="kr.co.shovvel.dm.domain.logis.management.DriverLogin"
+            useGeneratedKeys="true" keyProperty="driverLoginUid">
+        INSERT INTO logis_driver_login(LOGIS_NUMBER, DRIVER_NAME, DRIVER_HP_NO, LOGIN_DATE)
+        VALUES (#{logisNumber}, #{driverName}, #{driverHpNo}, NOW());
+    </insert>
+
+    <!-- 인증번호를 요청할 때, 인증번호를 DB에 추가한다. -->
+    <insert id="addAuthInfo" parameterType="string">
+        INSERT INTO logis_auth(DRIVER_HP_NO, AUTH_NUMBER)
+        VALUES (#{phoneNumber}, #{authNumber})
+    </insert>
+
+    <!-- 사용자가 입력한 인증번호가 맞는지 확인한다. -->
+    <!-- 현재는 만료 시간을 확인하지 않는다. -->
+    <select id="searchAuthNumber" parameterType="string" resultType="string">
+        SELECT AUTH_UID
+        FROM logis_auth
+        WHERE AUTH_NUMBER = #{authNumber}
+        AND DRIVER_HP_NO = #{phoneNumber}
+        ORDER BY AUTH_REQUEST_DATE DESC LIMIT 1;
+    </select>
+
+    <!-- 전체 택배 신청 목록을 조회한다. -->
+    <select id="searchLogisOrderInfo" resultType="kr.co.shovvel.dm.domain.logis.apply.LogisOrderInfo">
+        SELECT *
+        FROM logis_order_info
+        <![CDATA[
+        WHERE STATUS = 1
+        AND (ARRIVE_TIME is null OR DATE_FORMAT(ARRIVE_TIME, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d'));
+        ]]>
+    </select>
+
+    <!-- 차량에 담당된 택배 목록을 조회한다. -->
+    <select id="searchMyLogisOrderInfo" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.apply.LogisOrderInfo">
+        SELECT *
+        FROM logis_order_info
+        <![CDATA[
+        WHERE LOGIS_NUMBER = #{logisNumber}
+        AND (ARRIVE_TIME is null OR DATE_FORMAT(ARRIVE_TIME, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d'));
+        ]]>
+    </select>
+
+    <!-- 상세 택배를 조회한다. -->
+    <select id="searchLogisOrderInfoDetail" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.apply.LogisOrderInfo">
+        SELECT *
+        FROM logis_order_info
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </select>
+
+    <!-- 사용자가 입력한 물건 정보를 조회한다. -->
+    <select id="searchLogisItemInfo" parameterType="string" resultType="string">
+        SELECT ITEM_INFO
+        FROM logis_order_info
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </select>
+
+    <!-- 택배 상태를 업데이트한다. -->
+    <update id="updateLogisStatus" parameterType="string">
+        UPDATE logis_order_info
+        SET status = #{status}
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </update>
+
+    <!-- 기사가 물건을 추가할 때, 사용한다. -->
+    <insert id="addItemUsingLogis" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem"
+            useGeneratedKeys="true" keyProperty="itemUid">
+        INSERT INTO warehouse_item(STATE, ITEM_INFO)
+        VALUES (0, #{itemInfo});
+    </insert>
+
+    <!-- 택배 기사가 물품에 RFID를 등록한다. -->
+    <insert id="insertRfidByDriver" parameterType="kr.co.shovvel.dm.domain.logis.RFID">
+        INSERT INTO rfid(RFID_UID, ITEM_UID, LOGIS_ORDER_UID)
+        VALUES (#{rfidUid}, #{itemUid}, #{logisOrderUid});
+    </insert>
+
+    <!-- 배송 상세화면에서 포함된 물품을 조회한다. -->
+    <select id="searchRfidItem" parameterType="string" resultType="kr.co.shovvel.dm.domain.logis.RFIDItem">
+        SELECT r.ITEM_UID AS ITEM_UID, RFID_UID, ITEM_INFO
+        FROM rfid AS r
+        JOIN warehouse_item AS wi ON r.ITEM_UID = wi.ITEM_UID
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </select>
+
+    <!-- 기사가 배송 담당을 설정한다. -->
+    <update id="updateOrderLogisNumber" parameterType="string">
+        UPDATE logis_order_info
+        SET LOGIS_NUMBER = #{logisNumber}, STATUS = 2
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid}
+    </update>
+
+    <!-- RFID에 담겨진 내용을 지운다. -->
+    <delete id="clearRfidInfo" parameterType="string">
+        DELETE FROM rfid
+        WHERE RFID_UID = #{rfidUid};
+    </delete>
+
+    <!-- 기록된 물품 정보를 지운다. -->
+    <delete id="removeItemInfo" parameterType="string">
+        DELETE FROM warehouse_item
+        WHERE ITEM_UID = #{itemUid};
+    </delete>
+
+    <!-- ============================= 창고 관리자 =============================  -->
+
+    <!-- 사용자가 입력한 아이디와 비밀번호가 맞는지 확인한다. -->
+    <select id="searchWarehouseManager" parameterType="string" resultType="string">
+        SELECT WAREHOUSE_UID
+        FROM warehouse_management
+        WHERE LOGIN_ID = #{id} AND PASSWD = #{passwd}
+    </select>
+
+    <!-- 창고 목록을 조회한다. -->
+    <select id="searchWarehouseSpace" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.warehouse.WarehouseSpace">
+        SELECT *
+        FROM warehouse_space
+        WHERE WAREHOUSE_UID = #{warehouseUid};
+    </select>
+
+    <select id="searchItemList" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.management.SearchRfidInfo">
+        SELECT RFID_UID,
+        ITEM_UID,
+        SPACE_NAME,
+        DATE_FORMAT(IN_DATE,'%Y-%m-%d %H:%i') IN_DATE,
+        DATE_FORMAT(OUT_DATE,'%Y-%m-%d %H:%i') OUT_DATE,
+        wi.ITEM_INFO,
+        COMPANY_NAME
+        FROM warehouse_item wi
+        JOIN warehouse_space ws on wi.SPACE_UID = ws.SPACE_UID
+        JOIN warehouse_order_info woi on wi.ORDER_INFO_UID = woi.ORDER_INFO_UID
+        JOIN user_company uc on woi.COMPANY_UID = uc.COMPANY_UID
+        WHERE ws.WAREHOUSE_UID = #{warehouseUid}
+        AND STATE = 1
+    </select>
+
+    <select id="searchItem" parameterType="string" resultType="kr.co.shovvel.dm.domain.logis.management.SearchRfidInfo">
+        SELECT r.RFID_UID,
+        wi.ITEM_UID,
+        SPACE_NAME,
+        DATE_FORMAT(IN_DATE, '%Y-%m-%d %H:%i')  IN_DATE,
+        DATE_FORMAT(OUT_DATE, '%Y-%m-%d %H:%i') OUT_DATE,
+        wi.ITEM_INFO,
+        COMPANY_NAME,
+        wi.STATE
+        FROM warehouse_item wi
+        JOIN rfid r on wi.ITEM_UID = r.ITEM_UID
+        JOIN warehouse_space ws on wi.SPACE_UID = ws.SPACE_UID
+        JOIN warehouse_order_info woi on wi.ORDER_INFO_UID = woi.ORDER_INFO_UID
+        JOIN user_company uc on woi.COMPANY_UID = uc.COMPANY_UID
+        WHERE wi.ITEM_UID = #{itemUid}
+    </select>
+
+    <select id="searchRfidInfo" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.management.SearchRfidInfo">
+        SELECT r.RFID_UID,
+        wi.ITEM_UID,
+        IFNULL(SPACE_NAME, '') SPACE_NAME,
+        IFNULL(wi.IN_DATE, '') IN_DATE,
+        IFNULL(wi.OUT_DATE, '') OUT_DATE,
+        wi.STATE,
+        IFNULL(wi.ITEM_INFO, '') ITEM_INFO,
+        COMPANY_NAME
+        FROM rfid r
+        JOIN warehouse_item wi on r.ITEM_UID = wi.ITEM_UID
+        JOIN warehouse_order_info woi on wi.ORDER_INFO_UID = woi.ORDER_INFO_UID
+        JOIN user_company uc on woi.COMPANY_UID = uc.COMPANY_UID
+        JOIN warehouse_space ws on wi.SPACE_UID = ws.SPACE_UID
+        WHERE r.RFID_UID = #{rfidUid};
+    </select>
+
+    <update id="updateItemInItem" parameterType="string">
+        UPDATE warehouse_item
+        SET IN_DATE = NOW(), STATE = 1
+        WHERE ITEM_UID = #{itemUid};
+    </update>
+
+    <update id="updateItemOutItem" parameterType="string">
+        UPDATE warehouse_item
+        SET OUT_DATE = NOW(), STATE = 2
+        WHERE ITEM_UID = #{itemUid};
+    </update>
+
+    <update id="updateSpaceUid" parameterType="string">
+        UPDATE warehouse_item
+        SET SPACE_UID = #{spaceUid}
+        WHERE ITEM_UID = #{itemUid};
+    </update>
+
+    <!-- 현재 창고를 대여하고 있는 회사를 조회한다. -->
+    <select id="searchCompany" resultType="kr.co.shovvel.dm.domain.logis.management.Company">
+        SELECT ORDER_INFO_UID,
+        COMPANY_NAME,
+        ADDRESS,
+        DATE_FORMAT(START_TIME, '%Y-%m-%d %H:%i') START_TIME,
+        DATE_FORMAT(END_TIME, '%Y-%m-%d %H:%i') END_TIME
+        FROM warehouse_order_info woi,
+        user_company uc
+        WHERE woi.COMPANY_UID = uc.COMPANY_UID
+        AND STATUS = 1
+        AND NOW() BETWEEN START_TIME AND END_TIME;
+    </select>
+
+    <!-- 창고 관리자가 직접 물품을 입고할 때 사용한다. -->
+    <insert id="insertItemByManager" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem"
+            useGeneratedKeys="true" keyProperty="itemUid">
+        INSERT INTO warehouse_item(SPACE_UID, ORDER_INFO_UID, IN_DATE, STATE, ITEM_INFO)
+        VALUES (#{spaceUid}, #{orderInfoUid}, NOW(), 1, #{itemInfo});
+    </insert>
+
+    <!-- RFID_UID가 이미 사용된 것인지 확인을 한다. -->
+    <select id="checkRfidUid" parameterType="string" resultType="string">
+        SELECT RFID_NO
+        FROM rfid
+        WHERE RFID_UID = #{rfidUid} LIMIT 1;
+    </select>
+
+    <!-- 관리자가 직접 물품을 추가할 경우, 새로운 RFID 태그를 등록한다. -->
+    <insert id="insertRfidByManager" parameterType="string">
+        INSERT INTO rfid(RFID_UID, ITEM_UID, ORDER_INFO_UID)
+        VALUES (#{rfidUid}, #{itemUid}, #{orderInfoUid});
+    </insert>
+
+    <!-- 물품이 추가된 공간에 RFID UID를 업데이트한다. -->
+    <update id="updateRfidByManager" parameterType="string">
+        UPDATE warehouse_space
+        SET RFID_UID = #{rfidUid}
+        WHERE SPACE_UID = #{spaceUid};
+    </update>
+
+    <!-- RFID 검색으로 물품을 조회하는 화면에서 물품 위치를 변경할 때,
+         기존에 있던warehouse_space의 RFID_UID도 업데이트한다. -->
+    <update id="deleteSpaceRfid" parameterType="string">
+        UPDATE warehouse_space
+        SET RFID_UID = NULL
+        WHERE RFID_UID = #{rfidUid}
+    </update>
+
+    <!-- 입고를 할 때, 로그성 데이터를 추가한다. -->
+    <insert id="insertInItemHistory" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem">
+        INSERT INTO warehouse_item_history(ITEM_UID, SPACE_UID, ORDER_INFO_UID, IN_OUT_DATE, TYPE, ITEM_INFO)
+        VALUES (#{itemUid}, #{spaceUid}, #{orderInfoUid}, NOW(), 'IN', #{itemInfo});
+    </insert>
+
+    <!-- 출고를 할 때, 로그성 데이터를 추가한다. -->
+    <insert id="insertOutItemHistory" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem">
+        INSERT INTO warehouse_item_history(ITEM_UID, SPACE_UID, ORDER_INFO_UID, IN_OUT_DATE, TYPE, ITEM_INFO)
+        VALUES (#{itemUid}, #{spaceUid}, #{orderInfoUid}, NOW(), 'OUT', #{itemInfo});
+    </insert>
+
+    <!-- 물품 입출고 로그 데이터를 쌓기 위한 물품 조회 -->
+    <select id="searchItemForHistory" parameterType="string" resultType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem">
+        SELECT ITEM_UID, SPACE_UID, ORDER_INFO_UID, ITEM_INFO
+        FROM warehouse_item_history
+        WHERE ITEM_UID = #{itemUid};
+    </select>
+
+
+
+</mapper>

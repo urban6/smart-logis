@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.operation.userlevel.UserLevelMapper">
+
+
+	<delete id="removeAuthMenuLevel" parameterType="string">
+		DELETE FROM ONC_COM_USER_LEVEL_MENU
+		WHERE 1=1
+		AND LEVEL_ID = #{level_id}
+	</delete>
+	
+	
+	<select id="dupLevelTitle" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain" resultType="Integer">
+		SELECT COUNT(*)  
+			FROM ONC_COM_USER_LEVEL
+		WHERE LEVEL_TITLE=#{condition.new_menu_name}
+	</select>
+	
+	
+	
+	
+	<insert id="insUserLevel" parameterType="string">
+		INSERT INTO ONC_COM_USER_LEVEL_MENU (
+			  LEVEL_ID
+			, MENU_ID
+			, DEPTH
+			, UP_MENU_ID
+			, DISPLAY_ORDER
+			, AUTH_TYPE
+			)
+            SELECT
+				#{level_id}
+                , MENU_ID
+                , DEPTH
+				, UP_MENU_ID
+                , DISPLAY_ORDER
+                , 'A'
+			FROM ONC_COM_USER_MENU
+            WHERE MENU_ID=#{menu_id}
+	</insert>
+	
+	
+	<insert id="insertUserLevel" parameterType="string">
+		<selectKey keyProperty="level_id" resultType="String" order="BEFORE">
+	  		SELECT IFNULL(MAX(LEVEL_ID), 0) + 1 FROM ONC_COM_USER_LEVEL
+	  	</selectKey>
+		INSERT INTO ONC_COM_USER_LEVEL(
+			   LEVEL_ID
+		     , LEVEL_TITLE
+		     , PASSWD_LIFE_CYCLE
+		     , PASSWD_NOTI_DAY
+		     , MAX_WRONG_PASSWD_YN
+		     , MAX_WRONG_PASSWD
+		     , LOCK_TYPE
+		     , LOCK_TIME
+		     , ACCOUNT_LIFE_CYCLE
+		     , ACCOUNT_NOTI_DAY
+		     , ABSENT_LOCK_DAY
+		     , DESCRIPTION
+		     , LEVEL_CLCD
+		)
+		VALUES(
+			   #{level_id}
+			 , #{menu_name}
+			 , 3650
+			 ,3
+			 ,'N'
+			 ,0
+			 ,'M'
+			 ,null
+			 ,365
+			 ,null
+			 ,null
+			 ,#{description}
+			 ,null
+		)
+	</insert>
+	
+	<select id="selectLevel" parameterType="string" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		 SELECT LEVEL_ID
+		      , LEVEL_TITLE
+		      , DESCRIPTION
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE LEVEL_TITLE=#{menu_name}
+	</select>
+
+
+
+	<select id="listUser" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_header" />
+		 SELECT LEVEL_ID
+		      , LEVEL_TITLE
+		      , DESCRIPTION
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE 1=1
+		  ORDER BY LEVEL_ID
+		  <include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_footer" />
+	</select>
+	
+	
+	<select id="listUserDetail" parameterType="string" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		 SELECT CONVERT(LEVEL_ID, char character set utf8 ) as LEVEL_ID
+		      , LEVEL_TITLE
+		      , DESCRIPTION
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE 1=1
+		  AND LEVEL_ID=#{level_id}
+		  ORDER BY LEVEL_ID
+	</select>
+	
+	<select id="UserMenuList" parameterType="string" resultType="hashmap">
+	SELECT *
+             , CASE DEPTH WHEN 3 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = TBL.TEMP_VALUE) + (SELECT DISPLAY_ORDER FROM ONC_COM_USER_MENU WHERE MENU_ID = TBL.TEMP_VALUE2) ELSE TEMP_VALUE  END AS VIRTUAL_ORDER
+             FROM  (SELECT A.MENU_ID
+                         , A.UP_MENU_ID
+                         , A.MENU_NAME
+                         , A.MENU_PATH
+                         , A.IS_FOLDER
+                         , A.DEPTH
+                         , A.POPUP_YN
+                         , A.DISPLAY_ORDER
+                         , IFNULL(B.CNT, 0) AS CHILD_CNT
+                         , CASE A.DEPTH WHEN 1 THEN A.DISPLAY_ORDER*1000 WHEN 2 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) + A.DISPLAY_ORDER ELSE (SELECT UP_MENU_ID FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) END AS TEMP_VALUE
+		                 , CASE A.DEPTH WHEN 1 THEN A.DISPLAY_ORDER*1000 WHEN 2 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) + A.DISPLAY_ORDER ELSE (SELECT MENU_ID FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) END AS TEMP_VALUE2
+		                 , A.IMG_PATH
+                         FROM (SELECT A.MENU_ID
+                                    , A.UP_MENU_ID
+                                    , A.MENU_NAME
+                                    , A.MENU_PATH
+                                    , A.IS_FOLDER
+                                    , A.DEPTH
+                                    , A.POPUP_YN
+                                    , A.DISPLAY_ORDER
+                                    , IMG_PATH
+                                   FROM ONC_COM_USER_MENU A
+                                 WHERE A.USE_YN = 'Y'
+                            ) A
+                            LEFT OUTER JOIN
+                            (SELECT UP_MENU_ID
+                                  , COUNT(*) AS CNT
+                                  FROM ONC_COM_USER_LEVEL_MENU
+                                   WHERE UP_MENU_ID > 0
+                                GROUP BY UP_MENU_ID
+                            ) B
+                            ON A.MENU_ID = B.UP_MENU_ID
+             ) TBL
+           ORDER BY VIRTUAL_ORDER, DEPTH, DISPLAY_ORDER
+	</select>
+
+
+	<select id="UserMenuDetailList" parameterType="string" resultType="hashmap">
+	SELECT *
+             , CASE DEPTH WHEN 3 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = TBL.TEMP_VALUE) + (SELECT DISPLAY_ORDER FROM ONC_COM_USER_MENU WHERE MENU_ID = TBL.TEMP_VALUE2) ELSE TEMP_VALUE  END AS VIRTUAL_ORDER
+             FROM  (
+             
+					SELECT A.MENU_ID
+                         , A.UP_MENU_ID
+                         , A.MENU_NAME
+                         , A.MENU_PATH
+                         , A.IS_FOLDER
+                         , A.DEPTH
+                         , A.POPUP_YN
+                         , A.DISPLAY_ORDER
+                         , IFNULL(B.CNT, 0) AS CHILD_CNT
+                         , CASE A.DEPTH WHEN 1 THEN A.DISPLAY_ORDER*1000 WHEN 2 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) + A.DISPLAY_ORDER ELSE (SELECT UP_MENU_ID FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) END AS TEMP_VALUE
+		                 , CASE A.DEPTH WHEN 1 THEN A.DISPLAY_ORDER*1000 WHEN 2 THEN (SELECT DISPLAY_ORDER * 1000 FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) + A.DISPLAY_ORDER ELSE (SELECT MENU_ID FROM ONC_COM_USER_MENU WHERE MENU_ID = A.UP_MENU_ID) END AS TEMP_VALUE2
+                         , IFNULL(LEVEL_MENU.MENU_ID, '') AS LEVEL_ID
+                         FROM (SELECT A.MENU_ID
+                                    , A.UP_MENU_ID
+                                    , A.MENU_NAME
+                                    , A.MENU_PATH
+                                    , A.IS_FOLDER
+                                    , A.DEPTH
+                                    , A.POPUP_YN
+                                    , A.DISPLAY_ORDER
+                                    , IMG_PATH
+                                   FROM ONC_COM_USER_MENU A
+                                 WHERE A.USE_YN = 'Y'
+                            ) A
+                            LEFT OUTER JOIN
+                            (SELECT UP_MENU_ID
+                                  , COUNT(*) AS CNT
+                                  FROM ONC_COM_USER_LEVEL_MENU
+                                   WHERE UP_MENU_ID > 0
+                                   AND LEVEL_ID = #{level_id}
+                                GROUP BY UP_MENU_ID
+                            ) B
+                            ON A.MENU_ID = B.UP_MENU_ID
+                            LEFT OUTER JOIN
+                            ONC_COM_USER_LEVEL_MENU LEVEL_MENU
+							              ON ( A.MENU_ID = LEVEL_MENU.MENU_ID AND LEVEL_MENU.LEVEL_ID =  #{level_id} )
+             ) TBL
+           ORDER BY VIRTUAL_ORDER, DEPTH, DISPLAY_ORDER
+	</select>
+
+
+	<select id="UserMenuList_test" parameterType="string" resultType="hashmap">
+		SELECT 
+			MENU.MENU_ID
+			,MENU.USE_YN
+			,MENU.UP_MENU_ID
+			,MENU.MENU_NAME
+			,MENU.DEPTH
+			,MENU.DISPLAY_ORDER
+			,MENU.MENU_PATH
+			,IFNULL(MENU.IMG_PATH, '') AS IMG_PATH
+			,MENU.IS_FOLDER
+			,MENU.POPUP_YN
+			,IFNULL(MENU.DESCRIPTION, '') AS DESCRIPTION
+			,IFNULL(LEVEL_MENU.LEVEL_ID, '') AS LEVEL_ID
+			,IFNULL(LEVEL_MENU.AUTH_TYPE, '') AS AUTH_TYPE
+			,IFNULL(LEVEL_MENU.DISPLAY_ORDER, '') AS DISPLAY_ORDER
+			,IFNULL(LEVEL_MENU.UP_MENU_ID, '') AS UP_MENU_ID
+			,IFNULL(LEVEL_MENU.DEPTH, '') AS DEPTH
+		FROM 
+				ONC_COM_USER_MENU MENU 
+			LEFT OUTER JOIN  
+				ONC_COM_USER_LEVEL_MENU LEVEL_MENU
+				ON ( MENU.MENU_ID = LEVEL_MENU.MENU_ID )
+			AND LEVEL_MENU.LEVEL_ID=#{level_id}
+	</select>
+	
+
+
+	<select id="listUserLevel" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomainVO">
+		 SELECT LEVEL_ID
+		      , LEVEL_TITLE
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE 1=1
+		    AND LEVEL_ID <![CDATA[>=]]> #{userLevelId}
+		  ORDER BY LEVEL_ID
+	</select>
+
+	<select id="getMenu" resultType="kr.co.shovvel.dm.domain.management.operation.menu.Menu">
+		SELECT MENU_ID
+		     , MENU_NAME
+		     , IS_FOLDER
+		     , DEPTH
+		     , UP_MENU_ID
+		     , DISPLAY_ORDER
+		  FROM ONC_COM_USER_MENU
+		 <!-- WHERE PKG_NAME = #{pkgName} -->
+		ORDER BY DEPTH, DISPLAY_ORDER, MENU_ID
+	</select>
+
+	<select id="getAuthMenu" resultType="kr.co.shovvel.dm.domain.management.operation.menu.Menu">
+		SELECT B.MENU_ID
+		     , A.MENU_NAME
+		     , A.IS_FOLDER
+		     , B.DEPTH
+		     , B.UP_MENU_ID
+		     , B.AUTH_TYPE
+		     , B.DISPLAY_ORDER
+		  FROM ONC_COM_USER_MENU A
+		     , ONC_COM_USER_LEVEL_MENU B
+		 WHERE 1=1
+		<!--    AND A.PKG_NAME = #{pkgName} -->
+		   AND B.LEVEL_ID = #{levelId}
+		   AND A.MENU_ID = B.MENU_ID
+		ORDER BY A.DEPTH, A.DISPLAY_ORDER, A.MENU_ID
+	</select>
+
+	<select id="count" resultType="int">
+		SELECT COUNT(*)
+		  FROM ONC_COM_USER_LEVEL
+	</select>
+
+	<select id="list" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_header" />
+			SELECT LEVEL_ID
+			     , LEVEL_TITLE
+			     , ACCOUNT_LIFE_CYCLE
+			     , ACCOUNT_NOTI_DAY
+			     , MAX_WRONG_PASSWD
+			     , PASSWD_LIFE_CYCLE
+			     , PASSWD_NOTI_DAY
+			     , LOCK_TYPE
+			     , LOCK_TIME
+			     , '' AS LOCK_TYPE_NAME
+			     , ABSENT_LOCK_DAY
+			     , DESCRIPTION
+			     <!--, PARTNER_CLCD-->
+					<!--, ( SELECT CD_NM FROM COM_CD_MAP WHERE COM_CD = ONC_COM_USER_LEVEL.PARTNER_CLCD AND LANGUAGE_CLCD= #{condition.language_clcd} ) AS PARTNER_CLCD_NM-->
+			     , LEVEL_CLCD
+			  FROM ONC_COM_USER_LEVEL
+			 WHERE 1=1
+			   AND LEVEL_ID <![CDATA[>=]]> #{condition.userLevelId}
+			   <if test="condition.levelId != 'all' and condition.levelId != '' and condition.levelId != null ">
+			   AND LEVEL_ID = #{condition.levelId}
+			   </if>
+			 ORDER BY LEVEL_ID
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_footer" />
+	</select>
+
+	<select id="detail" resultType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		SELECT LEVEL_ID
+		     , LEVEL_TITLE
+		     , PASSWD_LIFE_CYCLE
+		     , PASSWD_NOTI_DAY
+		     , MAX_WRONG_PASSWD
+		     , MAX_WRONG_PASSWD_YN
+		     , LOCK_TYPE
+		     , LOCK_TIME
+		     , ACCOUNT_LIFE_CYCLE
+		     , ACCOUNT_NOTI_DAY
+		     , ABSENT_LOCK_DAY
+		     , '' AS LOCK_TYPE_NAME
+		     , DESCRIPTION
+		     <!--,	PARTNER_CLCD-->
+			 <!--,  ( SELECT CD_NM FROM COM_CD_MAP WHERE COM_CD=ONC_COM_USER_LEVEL.PARTNER_CLCD AND LANGUAGE_CLCD= #{condition.language_clcd} ) AS PARTNER_CLCD_NM-->
+			 ,	LEVEL_CLCD
+			 ,  ( SELECT CD_NM FROM COM_CD_MAP WHERE COM_CD=ONC_COM_USER_LEVEL.LEVEL_CLCD AND LANGUAGE_CLCD= #{condition.language_clcd} ) AS LEVEL_CLCD_NM
+		  FROM ONC_COM_USER_LEVEL
+		 WHERE 1=1
+		   AND LEVEL_ID <![CDATA[>=]]> #{condition.userLevelId}
+		   AND LEVEL_ID = #{condition.level_id}
+	</select>
+
+	<update id="modifyAction" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		UPDATE ONC_COM_USER_LEVEL
+		   SET PASSWD_LIFE_CYCLE = #{condition.passwd_life_cycle}
+		     , PASSWD_NOTI_DAY = #{condition.passwd_noti_day}
+		     , MAX_WRONG_PASSWD_YN = #{condition.max_wrong_passwd_yn}
+		     , MAX_WRONG_PASSWD = #{condition.max_wrong_passwd}
+		     , LOCK_TYPE = #{condition.lock_type}
+		     , LOCK_TIME = #{condition.lock_time}
+		     <!-- , #{condition.passwd_dup_count} -->
+		     , ACCOUNT_LIFE_CYCLE = #{condition.account_life_cycle}
+		     , ACCOUNT_NOTI_DAY = #{condition.account_noti_day}
+		     , ABSENT_LOCK_DAY = #{condition.absent_lock_day}
+		     , DESCRIPTION = #{condition.description}
+		     <!--, PARTNER_CLCD = #{condition.partner_clcd}-->
+		     , LEVEL_CLCD = #{condition.level_clcd}
+		 WHERE 1=1
+		   AND LEVEL_ID = #{condition.level_id}
+	</update>
+
+	<insert id="addAction" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		<selectKey keyProperty="level_id" resultType="String" order="BEFORE">
+	  		SELECT IFNULL(MAX(LEVEL_ID), 0) + 1 FROM ONC_COM_USER_LEVEL
+	  	</selectKey>
+		INSERT INTO ONC_COM_USER_LEVEL(
+			   LEVEL_ID
+		     , LEVEL_TITLE
+		     , PASSWD_LIFE_CYCLE
+		     , PASSWD_NOTI_DAY
+		     , MAX_WRONG_PASSWD_YN
+		     , MAX_WRONG_PASSWD
+		     , LOCK_TYPE
+		     , LOCK_TIME
+		     , ACCOUNT_LIFE_CYCLE
+		     , ACCOUNT_NOTI_DAY
+		     , ABSENT_LOCK_DAY
+		     , DESCRIPTION
+		     <!--, PARTNER_CLCD-->
+		     , LEVEL_CLCD
+		)
+		VALUES(
+			   #{level_id}
+			 , #{level_title}
+			 , #{passwd_life_cycle}
+			 , #{passwd_noti_day}
+			 , #{max_wrong_passwd_yn}
+			 , #{max_wrong_passwd}
+			 , #{lock_type}
+		     , #{lock_time}
+		     , #{account_life_cycle}
+		     , #{account_noti_day}
+		     , #{absent_lock_day}
+		     , #{description}
+		     <!--, #{partner_clcd}-->
+		     , #{level_clcd}
+		)
+	</insert>
+
+	<insert id="addAuthMenu" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.AuthMenuDomain">
+		INSERT INTO ONC_COM_USER_LEVEL_MENU (
+			  LEVEL_ID
+			, MENU_ID
+			, DEPTH
+			, UP_MENU_ID
+			, DISPLAY_ORDER
+			, AUTH_TYPE
+			)
+		VALUES (
+			  #{condition.level_id}
+			, #{condition.menu_id}
+			, #{condition.depth}
+			, #{condition.up_menu_id}
+			, #{condition.display_order}
+			, #{condition.auth_type}
+			)
+	</insert>
+
+	<delete id="removeAuthMenu" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		DELETE FROM ONC_COM_USER_LEVEL_MENU
+		WHERE 1=1
+		AND LEVEL_ID = #{condition.level_id}
+	</delete>
+
+	<select id="userCntOfLevel" resultType="int">
+		SELECT COUNT(*)
+		FROM ONC_COM_USER
+		WHERE LEVEL_ID =#{level_id}
+		  AND STATUS != 'N'
+	</select>
+
+	<delete id="removeAction" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		DELETE FROM ONC_COM_USER_LEVEL
+		WHERE 1=1
+		AND LEVEL_ID = #{level_id}
+	</delete>
+
+ 	<select id="duplChkLevelName" resultType="int">
+		 SELECT COUNT(*)
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE 1=1
+			AND UPPER(LEVEL_TITLE) = UPPER(#{levelName})
+	</select>
+
+
+	<update id="modifyLevelTitle" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain">
+		UPDATE ONC_COM_USER_LEVEL
+		   SET LEVEL_TITLE = #{condition.new_menu_name}
+		     , DESCRIPTION = #{condition.new_menu_path}
+		 WHERE 1=1
+		   AND LEVEL_ID = #{condition.level_id}
+	</update>
+	
+	
+	<select id="selUserLevel" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain" resultType="hashmap">
+	SELECT USER_SNO FROM ONC_COM_USER WHERE LEVEL_ID=#{condition.level_id}
+	</select>
+	
+	
+		<update id="updateUserLevel" parameterType="String">
+		UPDATE ONC_COM_USER 
+			SET LEVEL_ID=999
+			WHERE USER_SNO=#{userSno}
+	</update>
+	
+	
+		<select id="dupModifyLevelTitle" parameterType="kr.co.shovvel.dm.domain.management.operation.userlevel.UserLevelDomain" resultType="Integer">
+		SELECT COUNT(*)  
+			FROM ONC_COM_USER_LEVEL
+		WHERE LEVEL_TITLE=#{condition.new_menu_name}
+		AND LEVEL_ID != #{condition.level_id}
+	</select>
+	
+</mapper>

@@ -1,0 +1,16 @@
+package kr.co.shovvel.dm.dao.logis.logis;
+
+import kr.co.shovvel.dm.domain.logis.apply.LogisApplyInfo;
+import kr.co.shovvel.dm.domain.logis.search.LogisSearchInfo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface LogisMapper {
+
+    void insertLogisApply(LogisApplyInfo logisApplyInfo);
+
+    List<LogisSearchInfo> searchLogisHistory(@Param(value = "userUid") String userUid);
+
+    LogisSearchInfo searchLogisDetail(@Param(value = "logisHistUid") String logisHistUid);
+}

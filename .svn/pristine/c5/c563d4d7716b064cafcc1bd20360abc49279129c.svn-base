@@ -1,0 +1,29 @@
+package kr.co.shovvel.dm.service.logis.logis;
+
+import kr.co.shovvel.dm.common.Consts;
+import kr.co.shovvel.dm.dao.logis.logis.LogisMapper;
+import kr.co.shovvel.dm.domain.logis.apply.LogisApplyInfo;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class LogisService {
+
+    private Logger logger = Logger.getLogger(this.getClass());
+
+    @Autowired
+    private LogisMapper logisMapper;
+
+    public String applyAction(LogisApplyInfo logisApplyInfo) {
+        logisMapper.insertLogisApply(logisApplyInfo);
+
+        // 데이터가 들어 갔을 경우
+        if (logisApplyInfo.getLogisHistUid() != null) {
+            return Consts.LOGIS_APPLY_RESULT.SUCCESS;
+        } else {
+            // 데이터가 제대로 안들어 갔을 경우
+            return Consts.LOGIS_APPLY_RESULT.FAIL;
+        }
+    }
+}

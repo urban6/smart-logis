@@ -1,0 +1,9 @@
+package kr.co.shovvel.dm.dao.logis.logis;
+
+import kr.co.shovvel.dm.domain.logis.apply.LogisApplyInfo;
+
+public interface LogisMapper {
+
+    void insertLogisApply(LogisApplyInfo logisApplyInfo);
+
+}

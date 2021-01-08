@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+	<title>Upload an image</title>
+	<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="js/jquery.form.min.js"></script>
+	<script type="text/javascript" src="js/dialog-v4.js"></script>
+	<link href="css/dialog-v4.css" rel="stylesheet" type="text/css">
+	<script language="javascript" type="text/javascript">
+		$(function(){
+			$('#upl').ajaxForm({
+				dataType:  'json',
+				success: function(data) {
+					//alert('responseText: \n' + data);
+					var result = new Object();
+					result.result = data.retMsg;
+					result.filename = data.imageUrl;
+					if( data.retCd == '0') {
+						result.resultCode = 'ok';
+						result.width = data.imageWidth;
+						result.height = data.imageHeight;
+						jbImagesDialog.uploadFinish(result);
+					} else {
+						result.resultCode = 'failed';
+						jbImagesDialog.uploadFinish(result);
+					}
+				},
+				error: function(x, s, e) {
+					if(x.status == 0) {
+						alert('Error. : Please Check Your Network.');
+					} else if(x.status == 404) {
+						alert('Error. : Page not found.');
+					} else if(x.status == 500) {
+						alert('Error. : Internel Server Error.');
+					} else if(e == 'parsererror') {
+						alert('Error. : Parsing Request failed.');
+					} else if(e == 'timeout') {
+						alert('Error. : Request Time out.');
+					} else {
+						alert('Unknow Error. : ' + x.responseText);
+					}
+				}
+			});
+			$('#uploader').change(function() {
+				$('#upl').submit();
+			});
+		});
+	</script>
+</head>
+<body>
+
+	<!-- action="ci/index.php/upload/english" -->
+	<form class="form-inline" id="upl" name="upl" action="/upload/image-system-main" method="post" enctype="multipart/form-data" target="upload_target" onsubmit="jbImagesDialog.inProgress();">
+
+		<div id="upload_in_progress" class="upload_infobar"><img src="img/spinner.gif" width="16" height="16" class="spinner">Upload in progress&hellip; <div id="upload_additional_info"></div></div>
+		<div id="upload_infobar" class="upload_infobar"></div>	
+		
+		<p id="upload_form_container">
+			<!-- name="userfile" -->
+			<input id="uploader" name="image" type="file" class="jbFileBox" />
+		</p>
+		
+	</form>
+
+	<!--<iframe id="upload_target" name="upload_target" src=""></iframe>-->
+
+</body>
+</html>

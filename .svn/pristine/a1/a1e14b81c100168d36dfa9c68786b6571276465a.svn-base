@@ -1,0 +1,89 @@
+package kr.co.shovvel.dm.domain.logis.warehouse;
+
+import java.sql.Timestamp;
+
+public class WarehouseHistoryVO {
+	private int ware_hist_uid;
+	private int user_uid;
+	private String start_time;
+	private String end_time;
+	private String size;
+	private String request_time;
+	private int status;
+	private int price;
+	private String location;
+	private String pay_type;
+	private String isPay;
+	public int getWare_hist_uid() {
+		return ware_hist_uid;
+	}
+	public void setWare_hist_uid(int ware_hist_uid) {
+		this.ware_hist_uid = ware_hist_uid;
+	}
+	public int getUser_uid() {
+		return user_uid;
+	}
+	public void setUser_uid(int user_uid) {
+		this.user_uid = user_uid;
+	}
+	
+	
+	public String getSize() {
+		return size;
+	}
+	public void setSize(String size) {
+		this.size = size;
+	}
+	
+	public String getStart_time() {
+		return start_time;
+	}
+	public void setStart_time(String start_time) {
+		this.start_time = start_time;
+	}
+	public String getEnd_time() {
+		return end_time;
+	}
+	public void setEnd_time(String end_time) {
+		this.end_time = end_time;
+	}
+	public String getRequest_time() {
+		return request_time;
+	}
+	public void setRequest_time(String request_time) {
+		this.request_time = request_time;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	public int getPrice() {
+		return price;
+	}
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public String getPay_type() {
+		return pay_type;
+	}
+	public void setPay_type(String pay_type) {
+		this.pay_type = pay_type;
+	}
+	public String getIsPay() {
+		return isPay;
+	}
+	public void setIsPay(String isPay) {
+		this.isPay = isPay;
+	}
+	
+	
+}
+

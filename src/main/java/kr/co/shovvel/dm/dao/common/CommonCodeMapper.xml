@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="kr.co.shovvel.dm.dao.common.CommonCodeMapper">
+ 
+	<select id="getNowDateTime" resultType="String">
+		SELECT 
+			DATE_FORMAT(now(), 
+			(SELECT DB_PATTERN_TIME FROM ONC_DATE_PATTERN WHERE LOCALE = #{language})) 
+		FROM DUAL
+	</select>
+    
+    <select id="getNowDateTimeFromCommonCondition" resultType="String">
+		SELECT 
+			DATE_FORMAT(CONVERT_TZ(NOW(), '+00:00', #{zoneOffset}), (SELECT DB_PATTERN_TIME FROM ONC_DATE_PATTERN WHERE LOCALE = ONC_COMMON_CODE.CODE_NAME))
+		FROM ONC_COMMON_CODE
+		WHERE
+			CODE_GRP = '1000'
+		AND	CODE_CD = #{language_cd}
+		AND	USE_YN = 'Y'
+
+	</select>
+    
+    <select id="getAddDateTime" resultType="String">
+		SELECT CONCAT( DATE_FORMAT(DATE_ADD(NOW(),INTERVAL #{addDate} DAY), (SELECT DB_PATTERN_DATE FROM ONC_DATE_PATTERN WHERE LOCALE = #{language})) ,' ',DATE_FORMAT(now(), '%H:%i:%s') ) FROM DUAL
+	</select>
+    
+    <select id="getNowDateTimeFormat" resultType="String">
+		SELECT CONCAT( DATE_FORMAT(now(), (SELECT DB_PATTERN_DATE FROM ONC_DATE_PATTERN WHERE LOCALE = #{language})) ,' ',DATE_FORMAT(now(), '%H:%i:%s') ) FROM DUAL
+	</select>
+	
+	<select id="getNowDate" resultType="String">
+		SELECT DATE_FORMAT(now(), (SELECT DB_PATTERN_DATE FROM ONC_DATE_PATTERN WHERE LOCALE = #{language})) FROM DUAL
+	</select>
+	
+	<select id="getNowHour" resultType="String">
+		SELECT DATE_FORMAT(now(), '%H') FROM DUAL
+	</select>
+	
+	<select id="getNowMin" resultType="String">
+		SELECT DATE_FORMAT(now(), '%i') FROM DUAL
+	</select>
+
+	<select id="getSysDate" resultType="String"> 
+        SELECT DATE_FORMAT(now(), #{format}) FROM DUAL
+    </select>
+    
+    <select id="getSysDateTypeII" resultType="String"> 
+        SELECT SUBSTRING(DATE_FORMAT(NOW(), #{format}), ${startPos}, ${length})  FROM DUAL
+    </select>
+    
+    <select id="getCodeList" resultType="kr.co.shovvel.dm.domain.common.CommonCode">
+    	SELECT 
+    		CODE_GRP, 
+			CODE_CD, 
+			CODE_GRP_NAME, 
+			CODE_VAL, 
+			CODE_NAME, 
+			DESCRIPTION, 
+			DISPLAY_ORDER, 
+			DISPLAY_YN, 
+			USE_YN, 
+			MODIFY_BY, 
+			MODIFY_DATETIME
+    	FROM ONC_COMMON_CODE
+    	WHERE 1=1
+    	AND CODE_GRP = #{code_grp}
+    	AND USE_YN = 'Y'
+    	ORDER BY DISPLAY_ORDER ASC
+    </select>
+    
+    <select id="getCode" resultType="kr.co.shovvel.dm.domain.common.CommonCode">
+    	SELECT 
+    		CODE_GRP, 
+			CODE_CD, 
+			CODE_GRP_NAME, 
+			CODE_VAL, 
+			CODE_NAME, 
+			DESCRIPTION, 
+			DISPLAY_ORDER, 
+			DISPLAY_YN, 
+			USE_YN, 
+			MODIFY_BY, 
+			MODIFY_DATETIME
+    	FROM ONC_COMMON_CODE
+    	WHERE 1=1
+    	AND CODE_GRP = #{code_grp}
+    	AND CODE_CD = #{code_cd}
+    	AND USE_YN = 'Y'
+    </select>
+    
+    <select id="getCodeListMap" databaseId="mysql" resultType="java.util.HashMap">
+		SELECT CODE_CD   AS code_cd
+             , CODE_NAME AS code_name
+             , CODE_GRP  AS code_grp
+		FROM ONC_COMMON_CODE
+		WHERE 
+			CODE_GRP = #{code_grp}		
+		AND USE_YN = 'Y'
+		ORDER BY DISPLAY_ORDER, CODE_CD ASC
+    </select>
+    <select id="getCodeMap" databaseId="mysql" resultType="java.util.HashMap">
+		SELECT CODE_CD   AS code_cd
+             , CODE_NAME AS code_name
+             , CODE_GRP  AS code_grp
+		FROM ONC_COMMON_CODE
+		WHERE 
+			CODE_GRP = #{code_grp}		
+		AND	CODE_CD = #{code_cd}
+		AND USE_YN = 'Y'
+		ORDER BY DISPLAY_ORDER, CODE_CD ASC
+    </select>
+   
+    
+</mapper>

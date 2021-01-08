@@ -1,0 +1,56 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt"  prefix="fmt" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="/WEB-INF/tag/shovvel.tld" prefix="shovvel" %>
+
+<script type="text/javascript">
+    
+    $(document).ready(function() {
+     	
+		init();
+    });
+    
+    function init(){
+    }
+    
+   
+</script>
+<div class="pop_wrap">
+	<div class="pop_head">
+		<h1>예제 조회 Popup</h1>
+		<button class="btn close simplemodal-close" type="button" title="close"></button>
+	</div>
+	<div class="pop_cont board">
+		<!-- board -->
+		<div class="table type_01 y_scroll link mg_t10">
+			<div class="table type_01 detail">
+				<table>
+					<colgroup>
+						<col style="width: 230px;">
+						<col width="*">
+					</colgroup>
+					<tbody>
+						<tr>
+							<th scope="row"><em>예제 NAME</em></th>
+							<td>${sampleDomainInfo.sample_name}</td>
+						</tr>
+						<tr>
+							<th scope="row"><em>예제 Type</em></th>
+							<td>${sampleDomainInfo.sample_type_name}</td>
+						</tr>
+						<tr>
+							<th scope="row">등록일</th>
+							<td>${sampleDomainInfo.reg_datetime}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- //board -->
+	</div>
+	<div class="btn_area">
+		<button type="button" class="btn type_01 simplemodal-close">닫기</button>
+	</div>
+</div>

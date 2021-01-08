@@ -1,0 +1,115 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: jeonseungcheol
+  Date: 2020/11/05
+  Time: 10:01 오전
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>물류 공유해 : 창고 대여 완료</title>
+
+    <meta content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
+          name="viewport">
+
+    <%-- Bootstrap, JQuery Library --%>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <%-- Reset CSS --%>
+    <link rel="stylesheet" href="/css/reset.css">
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+        	
+			$("#completeBtn").click(function(){
+				location.href="/user/home/home";
+			});
+			var status = "${isStatus}";
+        	console.log(status);
+        	
+        	if(status == "P"){
+        		callPaycoUrl();
+        	}else{
+        		alert("ZZ");
+        	}
+        	
+        });
+        
+       
+        
+      	
+//외부가맹점의 주문 관리번호 얻기
+function randomStr(){
+	
+	var randomStr = "";
+	
+	for(var i=0;i<10;i++){
+		randomStr += Math.ceil(Math.random() * 9 + 1);
+	}
+	
+	randomStr = "TEST" + randomStr;
+	console.log(randomStr);
+	return randomStr;
+}
+//주문예약
+function callPaycoUrl(){
+	
+  	var customerOrderNumber = randomStr();
+  	var pathUrl = window.location.origin;
+  	
+  	var Params ="customerOrderNumber=" + customerOrderNumber;
+  	var productKey ="2960903800";
+  	var orderQuantity = parseInt($("#productQuantity").text());			// 상품 갯수
+  	Params += "&pathUrl="+pathUrl;
+  	Params += "&productKey="+productKey;
+  	Params += "&orderQuantity="+orderQuantity;
+  	
+	console.log(Params);
+    // localhost 로 테스트 시 크로스 도메인 문제로 발생하는 오류 
+    $.support.cors = true;
+
+	 $.ajax({
+		type: "POST",
+		url: "/management/pay/payco_reserve",
+		data: Params ,		// JSON 으로 보낼때는 JSON.stringify(customerOrderNumber)   Params
+		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+		dataType:"json",
+		success:function(data){
+			    console.log(data.linkedHashMap);
+			if(data.linkedHashMap.code == '0') {
+				console.log(data);
+				var order_Url =(data.linkedHashMap.result.orderSheetUrl); 
+				location.href = order_Url;
+			}else{
+				alert("code : " + data.linkedHashMap.code + "\n" + "message : " + data.linkedHashMap.message);
+			}
+		},
+        error: function(request,status,error) {
+            //에러코드
+            alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+			return false;
+        }
+	}); 
+}
+    </script>
+    <style>
+
+    </style>
+</head>
+<body>
+	<div>
+		<div id="productQuantity">${quantity }</div>
+		<h1>
+			창고 대여가 완료 되었습니다.
+		</h1>
+	</div>
+	<div class="btn btn-primary" id="completeBtn">확인</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.taxi.auth.AuthMapper">
+
+    <!-- 사용자가 로그인을 하고 인증번호를 요청할 때, 인증번호를 DB에 추가한다. -->
+    <insert id="insertAuthInfo" parameterType="string">
+        INSERT INTO taxi_auth(DRIVER_HP_NO, AUTH_NUMBER, AUTH_REQUEST_DATE)
+        VALUES (#{phoneNumber}, #{authNumber}, NOW())
+    </insert>
+
+    <!-- 사용자가 입력한 인증번호가 맞는지 확인한다. -->
+    <!-- 현재는 만료 시간을 확인하지 않는다. -->
+    <select id="selectAuthNumber" parameterType="string" resultType="string">
+        SELECT AUTH_UID
+        FROM taxi_auth
+        WHERE AUTH_NUMBER = #{authNumber}
+        AND DRIVER_HP_NO = #{phoneNumber}
+        ORDER BY AUTH_REQUEST_DATE DESC LIMIT 1;
+    </select>
+
+</mapper>

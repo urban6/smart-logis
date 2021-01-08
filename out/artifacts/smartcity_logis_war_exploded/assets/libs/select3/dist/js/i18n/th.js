@@ -1,0 +1,3 @@
+/*! select3 4.0.6-rc.1 | https://github.com/select3/select3/blob/master/LICENSE.md */
+
+(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select3&&jQuery.fn.select3.amd)var e=jQuery.fn.select3.amd;return e.define("select3/i18n/th",[],function(){return{errorLoading:function(){return"ไม่สามารถค้นข้อมูลได้"},inputTooLong:function(e){var t=e.input.length-e.maximum,n="โปรดลบออก "+t+" ตัวอักษร";return n},inputTooShort:function(e){var t=e.minimum-e.input.length,n="โปรดพิมพ์เพิ่มอีก "+t+" ตัวอักษร";return n},loadingMore:function(){return"กำลังค้นข้อมูลเพิ่ม…"},maximumSelected:function(e){var t="คุณสามารถเลือกได้ไม่เกิน "+e.maximum+" รายการ";return t},noResults:function(){return"ไม่พบข้อมูล"},searching:function(){return"กำลังค้นข้อมูล…"}}}),{define:e.define,require:e.require}})();

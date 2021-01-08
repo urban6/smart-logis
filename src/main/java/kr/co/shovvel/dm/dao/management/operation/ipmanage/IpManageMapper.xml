@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.operation.ipmanage.IpManageMapper">
+
+	<!-- <select id="listAllowYn" resultType="java.util.Map">
+		SELECT DETAIL_CD   AS ID
+		     , CODE_NAME   AS NAME
+		  FROM COM_COMMON_CODE
+		 WHERE 1=1
+		   AND UP_CODE_NO = (SELECT CODE_NO FROM COM_COMMON_CODE WHERE DETAIL_CD= <include refid="kr.co.shovvel.dm.dao.common.CodeDefine.COMMON_GROUP_CODE_ALLOWYN"/>)
+		 ORDER BY DISPLAY_ORDER
+	</select> -->
+
+	<!-- <select id="duplChkIpBandWidth" resultType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		SELECT IP
+		     , MAX_SIMULT
+		     , DESCRIPTION
+		  FROM COM_IP_MANAGER
+		 WHERE 1=1
+	</select> -->
+
+	<select id="count" resultType="int">
+		SELECT COUNT(*)
+		  FROM CONC_COM_IP_MANAGER
+		 WHERE 1=1
+		   <if test="condition.searchAllowYn != 'all' and condition.searchAllowYn != '' and condition.searchAllowYn != null">
+		   AND ALLOW_YN = #{condition.searchAllowYn}
+		   </if>
+		   <if test="condition.searchIp != '' and condition.searchIp != null">
+		   AND IP LIKE CONCAT('%', #{condition.searchIp , jdbcType=CHAR}, '%')
+		   </if>
+	</select>
+
+	<select id="list" resultType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_header" />
+			SELECT IP_MANAGER_NO
+			     , IP
+			     , ALLOW_YN
+			     , CASE ALLOW_YN
+			       	WHEN 'Y' THEN 'Allow'
+			       	WHEN 'N' THEN 'Deny'
+			       END AS ALLOW_NAME
+			     , MAX_SIMULT
+			     , DESCRIPTION
+			  FROM ONC_COM_IP_MANAGER
+			 WHERE 1=1
+			   <if test="condition.searchAllowYn != 'all' and condition.searchAllowYn != '' and condition.searchAllowYn != null">
+			   AND ALLOW_YN = #{condition.searchAllowYn}
+			   </if>
+			   <if test="condition.searchIp != '' and condition.searchIp != null">
+			   AND IP LIKE CONCAT('%', #{condition.searchIp , jdbcType=CHAR}, '%')
+			   </if>
+			 ORDER BY IP_MANAGER_NO DESC
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_footer" />
+	</select>
+
+	<select id="detail" resultType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		SELECT IP_MANAGER_NO
+		     , IP
+		     , ALLOW_YN
+		     , CASE ALLOW_YN
+		       	WHEN 'Y' THEN 'Allow'
+		       	WHEN 'N' THEN 'Deny'
+		       END AS ALLOW_NAME
+		     , MAX_SIMULT
+		     , DESCRIPTION
+		  FROM ONC_COM_IP_MANAGER
+		 WHERE 1=1
+		   AND IP_MANAGER_NO = #{condition.ip_manager_no}
+	</select>
+
+	<insert id="addAction" parameterType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		INSERT INTO ONC_COM_IP_MANAGER
+			(IP_MANAGER_NO ,IP, ALLOW_YN, MAX_SIMULT, DESCRIPTION)
+		VALUES
+			( #{condition.ip_manager_no} ,#{condition.ip}, #{condition.allow_yn},#{condition.max_simult},#{condition.description})
+	</insert>
+
+	<update id="modifyAction" parameterType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		UPDATE ONC_COM_IP_MANAGER
+		   SET IP = #{condition.ip}
+		     , ALLOW_YN = #{condition.allow_yn}
+		     , MAX_SIMULT = #{condition.max_simult}
+		     , DESCRIPTION = #{condition.description}
+		 WHERE 1=1
+		   AND IP_MANAGER_NO = #{condition.ip_manager_no}
+	</update>
+
+	<delete id="removeAction" parameterType="kr.co.shovvel.dm.domain.management.operation.ipmanage.IpManageDomain">
+		DELETE FROM ONC_COM_IP_MANAGER
+		 WHERE 1=1
+		   AND IP_MANAGER_NO = #{condition.ip_manager_no}
+	</delete>
+
+	<select id="getMaxIpNo" resultType="String">
+       SELECT MAX(IP_MANAGER_NO)+1
+       FROM ONC_COM_IP_MANAGER
+	</select>
+
+</mapper>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.common.ManagementCommonFileMapper">
+
+	<!-- 공통 > 첨부파일 리스트 (갯수)-->
+	<select id="selectFileListCnt" resultType="int">
+		<![CDATA[
+			SELECT
+				COUNT(0)
+			FROM
+				ONC_FILE_DATA AS DATA
+			WHERE
+				DATA.DATA_CD = #{condition.data_cd}
+				AND DATA.DATA_CD2 = #{condition.data_cd2}
+				AND DATA.DATA_SEQ = #{condition.data_seq}
+			
+		]]>
+	</select>
+
+	<!-- 공통 > 첨부파일 리스트-->
+	<select id="selectFileList" resultType="kr.co.shovvel.dm.domain.management.common.ManagementCommonFileDomain">
+		<![CDATA[
+			SELECT
+				DATA.*
+			FROM
+				ONC_FILE_DATA AS DATA
+			WHERE
+				DATA.DATA_CD = #{condition.data_cd}
+				AND DATA.DATA_CD2 = #{condition.data_cd2}
+				AND DATA.DATA_SEQ = #{condition.data_seq}
+			ORDER BY 
+				DATA.SEQ ASC
+		]]>
+	</select>
+
+	<!-- 공통 > 첨부파일 상세-->
+	<select id="selectFileDetail" resultType="kr.co.shovvel.dm.domain.management.common.ManagementCommonFileDomain">
+		<![CDATA[
+			SELECT
+				DATA.*
+			FROM
+				ONC_FILE_DATA AS DATA
+			WHERE
+				]]>
+				<choose>
+					<when test="condition.seq not in {null, ''}"><![CDATA[ DATA.SEQ = #{condition.seq} ]]></when>
+					<otherwise><![CDATA[ DATA.DATA_CD = #{condition.data_cd} 
+									AND DATA.DATA_CD2 = #{condition.data_cd2}
+									AND DATA.DATA_SEQ = #{condition.data_seq}]]></otherwise>
+				</choose>	
+				<![CDATA[
+			ORDER BY
+				DATA.SEQ DESC
+			LIMIT 1
+		]]>
+	</select>
+
+	<!-- 공통 > 첨부파일 상세 (복수 첨부 리스트) -->
+	<select id="selectFileMutiList" resultType="kr.co.shovvel.dm.domain.management.common.ManagementCommonFileDomain">
+		<![CDATA[
+			SELECT DATA_ORG.*
+			  FROM ONC_FILE_DATA DATA_ORG
+			       INNER JOIN (
+			       SELECT MAX(SEQ) AS SEQ
+			            , DATA_CD
+			            , DATA_CD2
+			         FROM ONC_FILE_DATA AS IN_DATA
+			        WHERE IN_DATA.DATA_CD = #{condition.data_cd}
+			          AND IN_DATA.DATA_CD2 LIKE CONCAT('%', #{condition.data_cd2}, '%')
+			          AND IN_DATA.DATA_SEQ = #{condition.data_seq}
+			        GROUP BY
+			              DATA_CD
+			            , DATA_CD2
+			       ) DATA_COM 
+			       ON DATA_ORG.SEQ = DATA_COM.SEQ
+			 ORDER BY
+			       DATA_ORG.DATA_CD2
+		]]>		
+	</select>
+
+	<!-- 공통 > 첨부파일 삭제대상 (복수 첨부 리스트) -->
+	<select id="selectDeleteFileMutiList" resultType="kr.co.shovvel.dm.domain.management.common.ManagementCommonFileDomain">
+		<![CDATA[
+			SELECT DATA_ORG.*
+			  FROM ONC_FILE_DATA DATA_ORG
+			       INNER JOIN (
+			       SELECT SEQ
+			            , DATA_CD
+			            , DATA_CD2
+			         FROM ONC_FILE_DATA AS IN_DATA
+			        WHERE IN_DATA.DATA_CD = #{condition.data_cd}
+			          AND IN_DATA.DATA_SEQ = #{condition.data_seq}
+			       ) DATA_COM 
+			       ON DATA_ORG.SEQ = DATA_COM.SEQ
+			 ORDER BY
+			       DATA_ORG.DATA_CD2
+		]]>		
+	</select>
+	
+	<!-- 공통 > 첨부파일 등록-->
+	<insert id="insertFile">
+		<selectKey keyProperty="condition.seq" resultType="int" order="AFTER">
+			<![CDATA[
+			SELECT LAST_INSERT_ID() AS SEQ
+			]]>
+		</selectKey>
+		<![CDATA[
+			INSERT INTO ONC_FILE_DATA (
+				DATA_CD,
+				DATA_CD2,
+				DATA_SEQ,
+				FILE_CD,
+				FILE_NM,
+				FILE_EXT,
+				FILE_SIZE,
+				REG_DT
+			) VALUES (
+				#{condition.data_cd},
+				#{condition.data_cd2},
+				#{condition.data_seq},
+				#{condition.file_cd},
+				#{condition.file_nm},
+				#{condition.file_ext},
+				#{condition.file_size},
+				SYSDATE()
+			)
+		]]>
+	</insert>
+	
+	<!-- 공통 > 첨부파일 고유번호 추가-->
+	<update id="updateFile">
+		<![CDATA[
+			UPDATE ONC_FILE_DATA SET
+				DATA_SEQ = #{condition.data_seq}
+			WHERE
+				SEQ = #{condition.seq}
+		]]>
+	</update>
+	
+	<!-- 공통 > 첨부파일 고유번호 추가-->
+	<update id="updateFile_bak">
+		<![CDATA[
+			UPDATE ONC_FILE_DATA SET
+				DATA_SEQ = #{condition.data_seq }
+			WHERE
+				FILE_CD = #condition.file_cd }
+		]]>
+	</update>
+	
+	<!-- 공통 > 첨부파일 사용안함 변경 -->
+	<update id="updateUnuseFile">
+		<![CDATA[
+			UPDATE ONC_FILE_DATA
+			   SET DATA_CD = #{condition.data_cd_param}
+			     , DATA_CD2 = #{condition.data_cd2_param}
+			 WHERE
+		]]>
+			<choose>
+				<when test="condition.seq not in {null, ''}"><![CDATA[
+			       SEQ = #{condition.seq}
+				]]></when>
+				<otherwise><![CDATA[
+			       DATA_SEQ = #{condition.data_seq}
+			   AND DATA_CD = #{condition.data_cd}
+			   AND DATA_CD2 = #{condition.data_cd2}
+				]]></otherwise>
+			</choose>
+	</update>
+	
+	<!-- 공통 > 첨부파일 삭제-->
+	<delete id="deleteFile">
+		<![CDATA[
+			DELETE FROM
+				ONC_FILE_DATA AS DATA
+			WHERE
+				]]>
+				<choose>
+					<when test="condition.seq not in {null, ''}"><![CDATA[ DATA.SEQ = #{condition.seq} ]]></when>
+					<otherwise><![CDATA[ DATA.DATA_CD = #{condition.data_cd} 
+									AND DATA.DATA_CD2 = #{condition.data_cd2}
+									AND DATA.DATA_SEQ = #{condition.data_seq}]]></otherwise>
+				</choose>	
+				<![CDATA[
+		]]>
+	</delete>
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.taxi.user.UserMapper">
+
+    <!-- 사용자가 입력한 아이디에 대한 정보를 조회 -->
+    <select id="selectUserUid" parameterType="string" resultType="kr.co.shovvel.dm.domain.taxi.user.TaxiUser">
+        SELECT USER_UID, LOGIN_ID
+        FROM taxi_user
+        WHERE LOGIN_ID = #{login_id}
+        AND STATUS = 'Y'
+    </select>
+
+    <!-- 사용자가 입력한 아이디 정보 조회 -->
+    <select id="countUser" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM taxi_user
+        WHERE LOGIN_ID = #{login_id};
+    </select>
+
+    <!-- 사용자 고유번호와 패스워드로 정보 조회 -->
+    <select id="searchLoginUserInfo" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.taxi.user.TaxiUser">
+        SELECT USER_UID, LOGIN_ID, USER_NAME, STATUS
+        FROM taxi_user
+        WHERE USER_UID = #{user_uid}
+        AND PASSWD = #{passwd}
+        AND STATUS = 'Y';
+    </select>
+
+    <!-- 마지막 로그인 날짜를 업데이트 -->
+    <update id="updateLastLoginDate" parameterType="string">
+        UPDATE taxi_user
+        SET LAST_LOGIN_DATE = NOW()
+        WHERE USER_UID = #{user_uid};
+    </update>
+
+    <!-- 회원가입 -->
+    <insert id="insertUserInfo" useGeneratedKeys="true" keyProperty="userUid"
+            parameterType="kr.co.shovvel.dm.domain.taxi.user.TaxiUser">
+        INSERT INTO taxi_user(LEVEL_ID, LOGIN_ID, PASSWD, USER_NAME, USER_HP_NO, STATUS, SIGN_UP_DATE)
+        VALUES (0, #{loginId}, #{passwd}, #{userName}, #{userHpNo}, 'Y', NOW());
+    </insert>
+
+</mapper>

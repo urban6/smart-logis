@@ -1,0 +1,21 @@
+package kr.co.shovvel.dm.dao.logis.warehouse;
+
+import java.util.List;
+import java.util.Map;
+
+import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
+import org.springframework.stereotype.Component;
+
+import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseHistoryVO;
+import kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO;
+
+@Component
+public interface WarehouseMapper {
+    int setWarehouseHistory(WarehouseHistoryVO orderInfo);
+
+    SellerProductInfoVO getProductInfo();
+
+    List<WarehouseSearchInfo> searchWarehouseHistory(String userUid);
+
+    WarehouseSearchInfo searchWarehouseHistoryDetail(String wareHistUid);
+}

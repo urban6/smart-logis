@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.logis.LogisMapper">
+
+    <!-- 물류 요청을 추가한다. -->
+    <insert id="insertLogisApply" useGeneratedKeys="true" keyProperty="logisHistUid"
+            parameterType="kr.co.shovvel.dm.domain.logis.apply.LogisApplyInfo">
+        INSERT INTO logis_history(USER_UID, SENDER_NAME, SENDER_PHONE, SENDER_POSTCODE, SENDER_ADDRESS,
+        RECEIVER_NAME, RECEIVER_PHONE, RECEIVER_POSTCODE, RECEIVER_ADDRESS, WEIGHT, REQUEST_TIME, STATUS, PRICE)
+        VALUES (#{userUid}, #{senderName}, #{senderPhone}, #{senderPostcode}, #{senderAddress}, #{receiverName},
+        #{receiverPhone}, #{receiverPostcode}, #{receiverAddress}, #{weight}, NOW(), 0, #{price});
+    </insert>
+</mapper>

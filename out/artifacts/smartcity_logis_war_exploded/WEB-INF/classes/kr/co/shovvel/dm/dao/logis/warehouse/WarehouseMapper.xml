@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.warehouse.WarehouseMapper">
+
+    <select id="getProductInfo" resultType="kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO">
+        SELECT *
+        FROM seller_product_info
+    </select>
+
+    <!-- 해당 유저와 관련된 창고 신청 내역을 조회한다. -->
+    <select id="searchWarehouseOrderInfo" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT ORDER_INFO_UID, USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+        w.WAREHOUSE_NAME AS WAREHOUSE_NAME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, woi.PRICE AS PRICE,
+        PAY_TYPE, IS_PAY
+        FROM warehouse_order_info AS woi
+        JOIN warehouse AS w ON woi.WAREHOUSE_UID = w.WAREHOUSE_UID
+        <![CDATA[
+        WHERE USER_UID = #{userUid} AND STATUS >= 1
+        ]]>
+        ORDER BY ORDER_INFO_UID DESC;
+    </select>
+
+    <select id="searchWarehouseOrderInfoDetail" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT ORDER_INFO_UID,USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME, w.WAREHOUSE_NAME AS
+        WAREHOUSE_NAME, WAREHOUSE_ADDRESS,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, woi.PRICE
+        AS PRICE, PAY_TYPE, IS_PAY
+        FROM warehouse_order_info AS woi
+        JOIN warehouse AS w ON woi.WAREHOUSE_UID = w.WAREHOUSE_UID
+        WHERE ORDER_INFO_UID = #{orderInfoUid}
+    </select>
+
+</mapper>

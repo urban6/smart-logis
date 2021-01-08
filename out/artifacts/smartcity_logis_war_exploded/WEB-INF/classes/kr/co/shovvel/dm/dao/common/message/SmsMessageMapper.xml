@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.common.message.SmsMessageMapper" >
+
+	<insert id="insertSendMessage" parameterType="hashMap" useGeneratedKeys="true" keyColumn="SMS_MSG_SNO">
+		INSERT	/* SmsMessageMapper.insertSendMessage */
+		INTO 	COM_SMS_SEND_HIST (
+				RECEIVE_USER_SERVICE_USE_SNO,
+				RECEIVE_HP_NO,
+				SMS_MSG_CTCD,
+				SMS_MSG_DETAIL_CTCD,
+				SMS_MSG_CTNT,
+				<!-- SMS_MSG_SEND_DT, -->
+				SMS_MSG_SEND_FINISH_YN,
+				INS_DT,
+				INS_USER_SNO
+		)
+		VALUES	(
+				#{userId},
+				#{phoneNumber},
+				#{messageCategory},
+				#{recipientCategory},
+				#{contents},
+				<!-- #{schduledDeleveryDateTime}, -->
+				'N',
+				NOW(),
+				#{userId}
+		)
+	</insert>
+
+</mapper>

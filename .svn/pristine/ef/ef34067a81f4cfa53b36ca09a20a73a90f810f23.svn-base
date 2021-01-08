@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.taxi.drive.DriveMapper">
+
+    <insert id="insertDrivingLog" parameterType="kr.co.shovvel.dm.domain.taxi.user.drive.DrivingLog">
+        INSERT INTO taxi_driving_log(USER_UID, ARRIVE_LOCATION, START_LOCATION, START_TIME, IS_PAY, STATE)
+        VALUES (
+        #{userUid},
+        #{arriveLocation},
+        #{startLocation},
+        now(),
+        0,
+        0
+        );
+    </insert>
+
+    <!-- 승객이 결제를 하고 최종적으로 보여줄 화면에서 필요한 정보를 조회 -->
+    <select id="selectDrivingLog" parameterType="string" resultType="kr.co.shovvel.dm.domain.taxi.user.drive.Driving">
+        SELECT tdl.START_LOCATION AS START_LOCATION,
+        tdl.ARRIVE_LOCATION AS ARRIVE_LOCATION,
+        td.DRIVING_UID AS DRIVING_UID,
+        tdl.DRIVING_LOG_UID AS DRIVING_LOG_UID,
+        t.DRIVER_NAME AS DRIVER_NAME,
+        tw.TAXI_NUMBER AS TAXI_NUMBER
+        FROM taxi_driving_log AS tdl
+        JOIN taxi_driving td on td.DRIVING_UID = tdl.DRIVING_UID
+        JOIN taxi_work tw on td.WORK_UID = tw.WORK_UID
+        JOIN taxi_driver t on t.DRIVER_UID = tw.DRIVER_UID
+        WHERE td.DRIVING_UID = #{drivingUid}
+        AND tdl.USER_UID = #{userUid}
+        LIMIT 1;
+    </select>
+
+	<!-- 대기중인 택시 검색 -->
+	<select id="serachDrivingTaxi" parameterType="int" resultType="Hashmap">
+         SELECT 
+        	a.driving_uid
+        	,a.wait_start_time
+        	,b.taxi_number
+        	,b.driver_name
+        	,b.driver_hp_no
+	        ,c.taxi_lat
+	        ,c.taxi_long
+        FROM taxi_driver_login b LEFT JOIN taxi_driving a ON a.DRIVER_LOGIN_UID = b.DRIVER_LOGIN_UID
+        RIGHT JOIN taxi_location c ON b.TAXI_NUMBER = c.TAXI_NUMBER
+        WHERE 1=1
+        AND a.state = #{ state}
+    </select>
+    
+    <!-- 대기중인 승객이 택시를 탔는지 안탔는지 확인 기사가 버튼을 누르면 state=1이 됨 -->
+    <select id="getTaxiUserState" parameterType="String" resultType="kr.co.shovvel.dm.domain.taxi.user.drive.DrivingLog">
+    	SELECT
+    		driving_log_uid
+    		,driving_uid
+    		,taxi_number
+    	FROM taxi_driving_log
+    	WHERE USER_UID = #{user_uid}
+    	AND STATE = 1
+    	ORDER BY START_TIME DESC limit 1
+    </select>
+    
+    <!-- 승객이 택시에 탄것이 확인되면 state=2로 변경 -->
+    <update id="updateLogUserState" parameterType="String">
+    	UPDATE taxi_driving_log SET
+    		state = 2
+    	WHERE 1=1
+    	AND DRIVING_LOG_UID = #{driving_log_uid}
+    </update>
+    
+    <!-- 승객이 택시에 탄것을 잘못 눌렀을 때 state=0으로 변경하고 drive정보 삭제 -->
+    <update id="resetState" parameterType="String">
+    	UPDATE taxi_driving_log SET
+    		state = 0
+    		,driving_uid = null
+    		,taxi_number = null
+    	WHERE 1=1
+    	AND DRIVING_LOG_UID = #{driving_log_uid}
+    </update>
+    
+    <!-- 대기중인 택시 검색 -->
+	<select id="boardingTaxiInfo" parameterType="int" resultType="Hashmap">
+        
+    </select>
+    
+</mapper>

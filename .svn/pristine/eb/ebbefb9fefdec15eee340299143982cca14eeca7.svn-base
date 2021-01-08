@@ -1,0 +1,181 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %> 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt"  prefix="fmt" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib uri="/WEB-INF/tag/shovvel.tld" prefix="shovvel" %>
+
+<script type="text/javascript" charset="utf-8" src="/scripts/stringUtil.js"></script>
+<script type="text/javascript" charset="utf-8" src="/scripts/jquery.alphanumeric.js"></script>
+<script src="/scripts/datetimepicker.moment.js"></script>
+<script src="/scripts/datetimepicker.js"></script>
+
+<script type="text/javascript" charset="utf-8" src="/scripts/rsa/jsbn.js"></script>
+<script type="text/javascript" charset="utf-8" src="/scripts/rsa/rsa.js"></script>
+<script type="text/javascript" charset="utf-8" src="/scripts/rsa/prng4.js"></script>
+<script type="text/javascript" charset="utf-8" src="/scripts/rsa/rng.js"></script>
+
+<script type="text/javascript">
+
+    //Ajax로 첫 화면의 데이터 호출
+    $(document).ready(function() {
+		$("#btn_save").click(function(){
+			goSave();
+		});
+		
+		$("#btn_cancel").click(function(){
+			goCancel();
+		});
+		
+		$("#sample_name").keyup(function(){
+    		checkSampleName();
+    	});
+    	
+		init();
+    });
+    
+    function init(){
+    }
+    
+    function goCancel(){
+    	$("#myForm").attr("action","/sample/detail");
+		$("#myForm").submit();
+	}
+    
+    function goDetail(){
+    	$("#myForm").attr("action","/sample/detail");
+		$("#myForm").submit();
+	}
+        
+ 	function goSave() {
+ 		if(!checkValidation()) {
+ 			return false;
+ 		}
+
+ 		if(!hasErrorMessage()) {
+ 			openConfirmModal("NOTIFICATION","저장 하시겠습니까?", function() {
+ 				showLoading();
+		    	var param = new Object();
+		    	param = $("#myForm").serialize();	
+		    	
+		 		$.ajax({
+		            url : "modifyAction",
+		            data : param,
+		            type : 'POST',
+		            dataType : 'json',
+		            success : function(data) {
+		            	console.log(data.result.result);
+	        			var returnObj = data.result;
+	        			
+		            	if(returnObj.result =="OK"){
+		            		goDetail();
+		            	} else {
+		            		openAlertModal("Warning", returnObj.message);
+		            	}
+		            },
+		            error: function(e){
+		            	openAlertModal("",callErrorMsg);
+		            },
+		            complete : function() {
+		            	hideLoading();
+					}
+				});
+ 			});
+ 		}
+ 	}
+	
+ 	function checkValidation()
+ 	{
+ 		if ($("#sample_name").val().length == 0) {
+ 			showErrorMessage("sample_name", "예제 Name을 입력하세요.");
+ 			$("#sample_name").focus();
+			return false;
+		}
+ 		
+ 		if ($("#sample_type").val() == null || $("#sample_type").val() == "") {
+			openAlertModal("Warning", "예제 타입을 선택하세요.");
+			$("#sample_type").focus();
+			return false;
+		}
+ 		
+ 		return true;
+ 	}
+ 	
+	function checkSampleName() {
+		if ($("#sample_name").val().length == 0) {
+			return false;
+		}
+
+		hideErrorMessage("sample_name");
+		var param = new Object();
+		param.sample_id = $("#sample_id").val();
+		param.sample_name = $("#sample_name").val();
+
+		$.ajax({
+			url : 'checkSampleName',
+			type : 'POST',
+			data : param,
+			dataType : 'text',
+			success : function(data) {
+				if (data != "OK") {
+					showErrorMessage("sample_name", "사용중인 Name입니다.");
+				} else {
+					hideErrorMessage("sample_name");
+				}
+			}
+		});
+	}
+	
+</script>
+<div class="content">
+	<h1 class="h1">예제 등록</h1>
+	<p class="path">
+		<span>Platform</span> <span>대쉬보드</span> <strong>예제 등록</strong>
+	</p>
+	<form id="myForm" name="myForm" method="POST">
+		<input type="hidden" id="sample_id" name="sample_id" value="${sampleDomainInfo.sample_id}">
+
+		<!-- board -->
+		<div class="table type_01 detail">
+			<table>
+				<colgroup>
+					<col style="width: 230px;">
+					<col width="*">
+				</colgroup>
+				<tbody>					
+					<tr>
+						<th scope="row"><em>예제 NAME</em></th>
+						<td>
+							<div class="input type_01 m" id="id_class">
+								<input type="text" id="sample_name" name="sample_name" value="${sampleDomainInfo.sample_name}">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><em>예제 Type</em></th>
+						<td>
+							<div class="select type_01 m">
+								<select id="sample_type" name="sample_type">
+									<option value="">선택</option>
+									<c:forEach items="${sampleCodeList}" var="sampleCode" varStatus="status">
+										<option value="${sampleCode.code_cd}" <c:if test="${sampleCode.code_cd eq sampleDomainInfo.sample_type}"> selected</c:if>>${sampleCode.code_name}</option>
+									</c:forEach>
+								</select>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</form>
+	<!-- //board -->
+
+	<!-- paging & right button -->
+	<div class="cont_footer type_01">
+		<div class="btn_area">
+			<button type="button" class="btn type_01" id="btn_cancel">취소</button>
+			<button type="button" class="btn type_01 primary" id="btn_save">저장</button>
+		</div>
+	</div>
+</div>
+

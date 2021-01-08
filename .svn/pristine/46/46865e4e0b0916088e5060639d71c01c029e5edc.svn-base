@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.warehouse.WarehouseMapper">
+
+    <insert id="setWarehouseHistory" parameterType="kr.co.shovvel.dm.domain.logis.warehouse.WarehouseHistoryVO">
+        INSERT INTO warehouse_history (
+        USER_UID
+        ,START_TIME
+        ,END_TIME
+        ,SIZE
+        ,REQUEST_TIME
+        ,STATUS
+        ,PRICE
+        ,LOCATION
+        ,PAY_TYPE
+        ,ISPAY
+        ) VALUES (
+        #{user_uid}
+        ,#{start_time}
+        ,#{end_time}
+        ,#{size}
+        ,now()
+        ,#{status}
+        ,#{price}
+        ,#{location}
+        ,#{pay_type}
+        ,#{isPay}
+        )
+    </insert>
+
+    <select id="getProductInfo" resultType="kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO">
+        SELECT
+        *
+        FROM seller_product_info
+    </select>
+
+    <!-- 해당 유저와 관련된 창고 신청 내역을 조회한다. -->
+    <select id="searchWarehouseHistory" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT WARE_HIST_UID, USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, PRICE,
+        LOCATION, PAY_TYPE, ISPAY
+        FROM warehouse_history
+        WHERE USER_UID = #{userUid}
+        ORDER BY REQUEST_TIME DESC;
+    </select>
+
+    <select id="searchWarehouseHistoryDetail" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT WARE_HIST_UID,USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, PRICE,
+        LOCATION, PAY_TYPE, ISPAY
+        FROM warehouse_history
+        WHERE WARE_HIST_UID = #{wareHistUid}
+    </select>
+
+</mapper>

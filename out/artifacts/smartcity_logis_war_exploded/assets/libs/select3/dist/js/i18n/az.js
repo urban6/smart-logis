@@ -1,0 +1,3 @@
+/*! select3 4.0.6-rc.1 | https://github.com/select3/select3/blob/master/LICENSE.md */
+
+(function(){if(jQuery&&jQuery.fn&&jQuery.fn.select3&&jQuery.fn.select3.amd)var e=jQuery.fn.select3.amd;return e.define("select3/i18n/az",[],function(){return{inputTooLong:function(e){var t=e.input.length-e.maximum;return t+" simvol silin"},inputTooShort:function(e){var t=e.minimum-e.input.length;return t+" simvol daxil edin"},loadingMore:function(){return"Daha çox nəticə yüklənir…"},maximumSelected:function(e){return"Sadəcə "+e.maximum+" element seçə bilərsiniz"},noResults:function(){return"Nəticə tapılmadı"},searching:function(){return"Axtarılır…"}}}),{define:e.define,require:e.require}})();

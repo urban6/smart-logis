@@ -1,0 +1,258 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: jeonseungcheol
+  Date: 2020/11/05
+  Time: 10:01 오전
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>물류 공유해 : 창고 대여 신청</title>
+
+    <meta content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
+          name="viewport">
+
+    <%-- Reset CSS --%>
+    <link rel="stylesheet" href="/css/reset.css">
+
+    <%-- Bootstrap, JQuery Library --%>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            document.getElementById('entrustDate').valueAsDate = new Date();
+            console.log("${productInfo.cpId}");
+            $("#submitBtn").click(function () {
+                var entrust = $("#entrustDate").val();
+                var backDate = $("#backDate").val();
+
+                if (entrust === "") {
+                    alert("맡기는 날짜를 입력하세요.");
+                } else if (backDate === "") {
+                    alert("찾는 날짜를 입력하세요.");
+                } else {
+                    order_chk();
+                }
+            });
+
+            $("#entrustDate").change(function () {
+                if ($("#backDate") != null) {
+                    calculateDay();
+                }
+            });
+
+            $("#backDate").change(function () {
+                calculateDay();
+            });
+
+            $("#Plus").click(function () {
+                var quantity = parseInt($("#productQuantity").text());
+                if (quantity < 999) {
+                    quantity += 1;
+                    $("#productQuantity").text(quantity);
+                    calculatePrice();
+                }
+            });
+            $("#Minus").click(function () {
+                var quantity = parseInt($("#productQuantity").text());
+                if (quantity > 1) {
+                    quantity -= 1;
+                    $("#productQuantity").text(quantity);
+                    calculatePrice();
+                } else {
+                    alert("1개 이하로 줄일 수 없습니다.")
+                }
+            });
+        });
+
+
+        //맡기는날짜 찾는날짜 받아서 날짜 차이 받아옴
+        function calculateDay() {
+            var sdd = $("#entrustDate").val();
+            var edd = $("#backDate").val();
+            var ar1 = sdd.split('-');
+            var ar2 = edd.split('-');
+            var da1 = new Date(ar1[0], ar1[1], ar1[2]);
+            var da2 = new Date(ar2[0], ar2[1], ar2[2]);
+            var dif = da2 - da1;
+            if (dif < 0) {
+                alert("찾는 날짜가 맡기는 날짜보다 빠릅니다.");
+                $("#days").removeClass("text-dark");
+                $("#days").addClass("text-danger");
+                $("#days").text("0");
+                return;
+            }
+            var cDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
+            //var cMonth = cDay * 30;// 월 만듬
+            //var cYear = cMonth * 12; // 년 만듬
+
+            if (sdd && edd) {
+// 연차이    	document.getElementById('years').value = parseInt(dif/cYear)
+// 월차이   	document.getElementById('months').value = parseInt(dif/cMonth)
+                $("#days").removeClass("text-danger");
+                $("#days").addClass("text-dark");
+                var days = parseInt(dif / cDay);
+                $('#days').text(days);   // 일차이
+                calculatePrice();
+
+            }
+        }
+
+        function calculatePrice() {
+            var sdd = $("#entrustDate").val();
+            var edd = $("#backDate").val();
+            var ar1 = sdd.split('-');
+            var ar2 = edd.split('-');
+            var da1 = new Date(ar1[0], ar1[1], ar1[2]);
+            var da2 = new Date(ar2[0], ar2[1], ar2[2]);
+            var dif = da2 - da1;
+            var cDay = 24 * 60 * 60 * 1000;// 시 * 분 * 초 * 밀리세컨
+            if (edd == "") {
+                var quantity = parseInt($("#productQuantity").text());
+                var price = parseInt($("#productPrice").text());
+                var totalPrice = 0;
+                totalPrice = price * quantity;
+                $("#totalPrice").val(totalPrice);
+            } else {
+                var days = parseInt(dif / cDay);
+                var quantity = parseInt($("#productQuantity").text());
+                var price = parseInt($("#productPrice").text());
+                var totalPrice = 0;
+                totalPrice = price * quantity * days;
+                $("#totalPrice").text(totalPrice);
+            }
+        }
+
+        // 주문예약 validation check
+        function order_chk() {
+
+            if ($("input:radio[name=sort]:checked").val() == null) {
+                alert("결제방식을 선택하세요.");
+                return;
+            } else {
+                const checkPayMethod = $("input:radio[name=sort]:checked").val();
+
+                const entrustDate = document.getElementById('entrustDate');
+                const backDate = document.getElementById('backDate');
+
+                const inputPayMethod = document.createElement("input");
+                inputPayMethod.setAttribute("name", "checkPayMethod");
+                inputPayMethod.setAttribute("value", checkPayMethod);
+
+                const isPay = document.createElement("input");
+                isPay.setAttribute("name", "isPay");
+                isPay.setAttribute("value", "N");
+
+                const quantity = document.createElement("input");
+                quantity.setAttribute("name", "quantity");
+                quantity.setAttribute("value", $("#productQuantity").text());
+
+                const days = document.createElement("input");
+                days.setAttribute("name", "days");
+                days.setAttribute("value", $("#days").text());
+
+                const totalPrice = document.createElement("input");
+                totalPrice.setAttribute("name", "totalPrice");
+                totalPrice.setAttribute("value", $("#totalPrice").text());
+
+                const form = document.createElement('form');
+
+                form.setAttribute('method', "POST");
+                form.setAttribute('action', "/user/warehouse/order");
+                form.appendChild(inputPayMethod);
+                form.appendChild(entrustDate);
+                form.appendChild(backDate);
+                form.appendChild(isPay);
+                form.appendChild(quantity);
+                form.appendChild(days);
+                form.appendChild(totalPrice);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+
+    </script>
+    <style>
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row h-10">
+        <div>
+            <h2>창고 대여</h2>
+        </div>
+    </div>
+    <div class="row align-items-start">
+        <div class="col-10 align-self-center">
+            <div class="row mt-3">
+                <div class="col-lg-12 col-sm-12 p-0 mb-2">
+                    <div class="card h-100 mx-2">
+                        <div class="card-body">
+                            <!-- 창고 이름 적어 놓음 창고가 늘어나면 DB에서 불러와야함 -->
+                            <h6 class="card-subtitle mb-2">창고 이름</h6>
+                            <input type="hidden" id="productKey" value="2960903800">
+                            <div class="row align-items-center gx-2">
+                                <div class="col">
+                                    <span class="js-counter display-4 text-dark" id="productQuantity">1</span>
+                                    <span class="text-body font-size-sm ml-1">from 1100 x 1100 (mm)</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="btn btn-sm btn-primary" id="Plus">
+                                        +
+                                    </div>
+                                    <div class="btn btn-sm btn-primary" id="Minus">
+                                        -
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <span class="h2" id="productPrice">10</span><span>원 (1day)</span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="text-right">
+                <span class="js-counter h2 text-dark">총 금액: </span>
+                <span class="js-counter h2 text-dark" id="totalPrice">10</span>
+            </div>
+
+            <hr>
+            <div class="row mt-2">
+                <h3>맡기는 날짜</h3>
+                <input type="date" class="mx-2" id="entrustDate" name="entrustDate">
+                <h3>찾는 날짜</h3>
+                <input type="date" class="mx-2" id="backDate" name="backDate">
+                &nbsp<h3 class="text-dark" id="days">0</h3>
+                <h3>일</h3>
+            </div>
+            <div class="row mt-3">
+                <h5 class="mr-3">결제 방법</h5>
+                <p class="mb-1 mr-2"><input type="radio" value="Z" name="sort" id="payZero"> <label for="payZero">
+                    제로페이</label></p>
+                <p class="mb-1"><input type="radio" value="P" name="sort" id="payco"> <label for="payco"> 페이코</label>
+                </p>
+            </div>
+        </div>
+
+    </div>
+    <div class="btn btn-primary mt-2" id="submitBtn">submit</div>
+</div>
+
+</body>
+</html>
+		
+
+        

@@ -1,0 +1,158 @@
+package kr.co.shovvel.dm.domain.logis.search;
+
+public class LogisSearchInfo {
+
+    // 고유번호
+    private String logisOrderUid;
+    private String userUid;
+
+    // 보내는 사람 정보
+    private String senderName;
+    private String senderPhone;
+    private String senderPostcode;
+    private String senderAddress;
+
+    // 받는 사람 정보
+    private String receiverName;
+    private String receiverPhone;
+    private String receiverPostcode;
+    private String receiverAddress;
+
+    // 출발, 도착 시간
+    private String startTime;
+    private String arriveTime;
+
+    // 기타
+    private String weight;
+    private String requestTime;
+    private String status;
+    private int price;
+
+    public String getlogisOrderUid() {
+        return logisOrderUid;
+    }
+
+    public void setlogisOrderUid(String logisOrderUid) {
+        this.logisOrderUid = logisOrderUid;
+    }
+
+    public String getUserUid() {
+        return userUid;
+    }
+
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderPhone() {
+        return senderPhone;
+    }
+
+    public void setSenderPhone(String senderPhone) {
+        this.senderPhone = senderPhone;
+    }
+
+    public String getSenderPostcode() {
+        return senderPostcode;
+    }
+
+    public void setSenderPostcode(String senderPostcode) {
+        this.senderPostcode = senderPostcode;
+    }
+
+    public String getSenderAddress() {
+        return senderAddress;
+    }
+
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public String getReceiverPhone() {
+        return receiverPhone;
+    }
+
+    public void setReceiverPhone(String receiverPhone) {
+        this.receiverPhone = receiverPhone;
+    }
+
+    public String getReceiverPostcode() {
+        return receiverPostcode;
+    }
+
+    public void setReceiverPostcode(String receiverPostcode) {
+        this.receiverPostcode = receiverPostcode;
+    }
+
+    public String getReceiverAddress() {
+        return receiverAddress;
+    }
+
+    public void setReceiverAddress(String receiverAddress) {
+        this.receiverAddress = receiverAddress;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getArriveTime() {
+        return arriveTime;
+    }
+
+    public void setArriveTime(String arriveTime) {
+        this.arriveTime = arriveTime;
+    }
+
+    public String getWeight() {
+        return weight;
+    }
+
+    public void setWeight(String weight) {
+        this.weight = weight;
+    }
+
+    public String getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(String requestTime) {
+        this.requestTime = requestTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+}

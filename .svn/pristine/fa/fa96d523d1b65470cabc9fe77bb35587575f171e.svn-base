@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="smartcity-management:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>smartcity-management</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="smartcity-management.war">
+      <element id="artifact" artifact-name="smartcity-management:war exploded" />
+    </root>
+  </artifact>
+</component>

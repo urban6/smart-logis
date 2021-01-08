@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.common.CommonMapper">
+
+    <sql databaseId="oracle" id="paging_header">
+		SELECT *
+		    FROM (SELECT originalQuery.*
+		               , ROWNUM AS RNUM
+			          FROM (
+	</sql>
+
+	<sql databaseId="oracle" id="paging_footer">
+		) originalQuery
+
+		<if test="start != 0 and end != 0">
+			<if test="end > 0">
+				WHERE ROWNUM <![CDATA[<=]]>
+				(#{end}+#{start})
+			</if>
+			) WHERE RNUM > #{start}
+		</if>
+	</sql>
+
+	<sql databaseId="mysql" id="paging_header">
+	</sql>
+
+	<sql databaseId="mysql" id="paging_footer">
+		<if test="start != 0 or end != 0">
+			<![CDATA[
+				Limit #{start} , #{end}
+		    ]]>
+		</if>
+	</sql>
+
+    <!--
+    	** 언어 패턴 조회
+    	-->
+	<select id="findLocalePattern" parameterType="string" resultType="hashmap">
+		SELECT PATTERN_DATE
+		     , PATTERN_TIME
+		     , PATTERN_MONTH
+		    FROM COM_DATE_PATTERN
+		   WHERE LOCALE = #{locale}
+	</select>
+
+	<select id="findLocaleLanguage" parameterType="string" resultType="hashmap">
+		SELECT
+			COM_CD.COM_CD,
+			COM_CD.UPPER_COM_CD,
+			COM_CD_MAP.CD_NM,
+			COM_CD.CD_DESC,
+			COM_CD_MAP.CD_DESC
+		FROM COM_CD
+		LEFT OUTER JOIN COM_CD_MAP
+		ON (COM_CD.COM_CD = COM_CD_MAP.COM_CD)
+		WHERE
+			COM_CD.UPPER_COM_CD = '10801000'
+		AND	COM_CD.USE_YN = 'Y'
+		AND	COM_CD_MAP.CD_DESC LIKE CONCAT('%', #{locale},'%')
+	</select>
+
+	<!--
+    	** 매뉴명 조회
+    	-->
+	<select id="findMenuName" parameterType="string" resultType="hashmap">
+		SELECT B.MENU_ID
+		     , B.MENU_NAME
+		     , A.AUTH_TYPE
+		     , B.UP_MENU_ID
+		     FROM (SELECT B.LEVEL_ID
+		                , B.MENU_ID
+		                , B.AUTH_TYPE
+		                FROM (SELECT A.LEVEL_ID
+		                           FROM (SELECT LEVEL_ID
+		                                      FROM ONC_COM_USER
+		                                     WHERE USER_SNO = #{userSno}
+		                                 )A
+		                               , ONC_COM_USER_LEVEL B
+		                          WHERE A.LEVEL_ID = B.LEVEL_ID
+		                     )A
+		                   , ONC_COM_USER_LEVEL_MENU B
+                       WHERE A.LEVEL_ID = B.LEVEL_ID
+                  )A
+               , (SELECT MENU_ID
+		               , MENU_NAME
+		               , UP_MENU_ID
+		               FROM ONC_COM_USER_MENU
+		              WHERE BINARY(MENU_PATH) LIKE #{url}
+		               AND IS_FOLDER = 'N'
+		          ) B
+		   WHERE A.MENU_ID = B.MENU_ID
+		   ORDER BY MENU_ID ASC
+		   LIMIT 1
+	</select>
+
+	<!--
+    	** 유저 level_id 조희
+    	-->
+	<select id="getUserLevelId" parameterType="string" resultType="string">
+		SELECT LEVEL_ID
+		  FROM ONC_COM_USER
+		 WHERE 1=1
+		   AND USER_SNO = #{userSno}
+	</select>
+
+	<!--
+    	** Recent 최근의 메뉴 입력
+    	-->
+	<insert id="addRecent" parameterType="hashmap">
+		INSERT INTO ONC_COM_USER_RECENT_MENU (
+			MENU_ID
+		  , USER_SNO
+		  , CREATE_TIME
+		) VALUES (
+			#{menuId}
+		  , #{userSno}
+		  , NOW()
+		)
+	</insert>
+
+	<!--
+    	** Recent 최근의 메뉴 삭제
+    	-->
+	<delete id="removeRecent" parameterType="hashmap">
+		DELETE
+		    FROM ONC_COM_USER_RECENT_MENU
+		   WHERE USER_SNO = #{userSno}
+		   	 <if test="menuId != null and menuId != ''">
+		     	AND MENU_ID = #{menuId}
+		     </if>
+    </delete>
+
+    <!--
+    	** Recent 최근의 메뉴 조회
+    	-->
+	<select id="findRecent" parameterType="string" resultType="hashmap">
+		SELECT C.MENU_NAME
+		     , C.MENU_PATH
+		     , D.MENU_ID
+		  FROM ONC_COM_USER A
+		     , ONC_COM_USER_LEVEL_MENU B
+		     , ONC_COM_USER_MENU C
+		     , ONC_COM_USER_RECENT_MENU D
+		 WHERE 1=1
+		   AND A.LEVEL_ID = B.LEVEL_ID
+		   AND B.MENU_ID = C.MENU_ID
+		   AND C.MENU_ID = D.MENU_ID
+		   AND D.USER_SNO = A.USER_SNO
+		   AND A.USER_SNO = #{userSno}
+		   AND C.POPUP_YN = 'N'
+		 ORDER BY CREATE_TIME DESC
+		 LIMIT 5
+	</select>
+
+
+	<select id="getNowDateTime" resultType="String">
+		SELECT
+			DATE_FORMAT(now(), (SELECT DB_PATTERN_TIME FROM COM_DATE_PATTERN WHERE LOCALE = #{language}))
+		FROM DUAL
+	</select>
+	<select id="getNowDate" resultType="String">
+		SELECT DATE_FORMAT(now(), (SELECT DB_PATTERN_DATE FROM COM_DATE_PATTERN WHERE LOCALE = #{language})) FROM DUAL
+	</select>
+	<select id="getNowHour" resultType="String">
+		SELECT DATE_FORMAT(now(), '%H') FROM DUAL
+	</select>
+
+	<select id="getNowMin" resultType="String">
+		SELECT DATE_FORMAT(now(), '%i') FROM DUAL
+	</select>
+
+	<select id="getCodeList" resultType="kr.co.shovvel.dm.domain.common.CommonDomain">
+    	SELECT
+    		CODE_GRP,
+			CODE_CD,
+			CODE_GRP_NAME,
+			CODE_VAL,
+			CODE_NAME,
+			DESCRIPTION,
+			DISPLAY_ORDER,
+			DISPLAY_YN,
+			USE_YN,
+			MODIFY_BY,
+			MODIFY_DATETIME
+    	FROM COM_COMMON_CODE
+    	WHERE 1=1
+    	AND CODE_GRP = #{code_grp}
+    	AND USE_YN = 'Y'
+    	ORDER BY DISPLAY_ORDER ASC
+    </select>
+	<select id="getCodeListMap" databaseId="mysql" resultType="java.util.HashMap">
+		SELECT
+            COM_CD.COM_CD AS com_cd,
+            COM_CD.UPPER_COM_CD AS upper_com_cd,
+            COM_CD_MAP.CD_NM AS cd_nm
+        FROM COM_CD
+        LEFT OUTER JOIN COM_CD_MAP
+        ON (COM_CD.COM_CD = COM_CD_MAP.COM_CD)
+        WHERE
+            COM_CD.UPPER_COM_CD = #{upper_com_cd}
+        AND	COM_CD.USE_YN = 'Y'
+        AND	COM_CD_MAP.LANGUAGE_CLCD = #{language_clcd}
+        ORDER BY DISPLAY_ORDER, COM_CD ASC
+    </select>
+
+
+</mapper>
