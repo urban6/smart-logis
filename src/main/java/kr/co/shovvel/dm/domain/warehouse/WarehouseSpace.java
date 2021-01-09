@@ -8,8 +8,46 @@ public class WarehouseSpace {
     private String startDatetime;
     private String endDatetime;
     private int userUid;
+    private String rfidUid;
+    private String startTime;
+    private String endTime;
+    private String companyName;
+    
 
-    public int getSpaceUid() {
+    
+    public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getRfidUid() {
+		return rfidUid;
+	}
+
+	public void setRfidUid(String rfidUid) {
+		this.rfidUid = rfidUid;
+	}
+
+	public int getSpaceUid() {
         return spaceUid;
     }
 

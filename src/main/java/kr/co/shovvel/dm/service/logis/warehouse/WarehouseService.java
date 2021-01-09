@@ -1,6 +1,7 @@
 package kr.co.shovvel.dm.service.logis.warehouse;
 
 import java.net.HttpCookie;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import kr.co.shovvel.dm.common.Consts;
 import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
 import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseLendInfo;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseInfo;
+import kr.co.shovvel.dm.domain.warehouse.WarehouseItem;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseSpace;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +33,47 @@ public class WarehouseService {
         return warehouseMapper.searchWarehouseOrderInfo(userUid);
     }
     
-    public List<WarehouseSearchInfo> serchRentWarehouse(String userUid) {
-        return warehouseMapper.serchRentWarehouse(userUid);
+    // 내가 빌려준 창고 예약현황
+    public List<WarehouseSearchInfo> serchRentWarehouse(String warehouseUid) {
+        return warehouseMapper.serchRentWarehouse(warehouseUid);
         
     }
     
-    public List<WarehouseSearchInfo> serchRentWarehouseBefore(String userUid) {
-        return warehouseMapper.serchRentWarehouseBefore(userUid);
+    // 내가 빌려준 창고 내역
+    public List<WarehouseSearchInfo> serchRentWarehouseBefore(String warehouseUid) {
+        return warehouseMapper.serchRentWarehouseBefore(warehouseUid);
+    }
+    
+    //내가 빌려준 창고 상세정보
+    public WarehouseSearchInfo searchRentWarehouseOrderInfoDetail(String orderInfoUid) {
+    	return warehouseMapper.searchRentWarehouseOrderInfoDetail(orderInfoUid);
+    }
+    
+    //빌려준 창고 상세 품목 조회
+    public List<WarehouseItem> rentWarehouseItemListDetail(String orderInfoUid){
+    	return warehouseMapper.rentWarehouseItemListDetail(orderInfoUid);
+    }
+    
+    //창고 공간 현황
+    public List<WarehouseSpace> searchWarehouseSpace(String warehouseUid){
+    	return warehouseMapper.searchWarehouseSpace(warehouseUid);
+    }
+    
+    //창고 공간 detail
+    public List<HashMap<String, Object>> warehouseSpaceDetail(String spaceUid){
+    	return warehouseMapper.warehouseSpaceDetail(spaceUid);
+    }
+    
+    // 창고를 빌려준 사람인지 아닌지 확인
+    public String findWarehouseUid(String userUid) {
+    	return warehouseMapper.findWarehouseUid(userUid);
     }
 
     public WarehouseSearchInfo searchWarehouseOrderInfoDetail(String orderInfoUid) {
         return warehouseMapper.searchWarehouseOrderInfoDetail(orderInfoUid);
     }
+    
+    
 
     /**
      * 로그인된 사용자의 회사 위치를 검색한다.

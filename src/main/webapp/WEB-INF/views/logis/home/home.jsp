@@ -20,7 +20,7 @@
     <script src="/javascripts/jquery.animate-enhanced.min.js"></script>
     <script src="/javascripts/hammer.min.js"></script>
     <script src="/javascripts/jquery.superslides.js" type="text/javascript" charset="utf-8"></script>
-
+	<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             // 창고 대여
@@ -49,7 +49,8 @@
             });
 
             // 내가빌려준 창고 조회
-            $("#rentWarehouseSearch").click(function (key) {
+            $("#rentWarehouseSearch").click(function () {
+                //rentWarehouseSearch();	지금 안됨 수정해야됨
                 movePage("POST", "/user/warehouse/rentSearch");
             });
         });
@@ -61,6 +62,27 @@
             document.body.appendChild(form);
             form.submit();
         }
+        
+        //내가 창고를 빌려줫을 때만 조회
+        function rentWarehouseSearch(){
+        	console.log("click");
+        	var params="customerOrderNumber=111" ;
+        	 $.ajax({
+                 type: "POST",
+                 url: "/user/warehouse/findWarehouseUid",
+                 data: params,		
+                 dataType: "Json",
+                 success: function (data) {
+                    console.log(data);
+                 },
+                 error: function (request, status, error) {
+                     //에러코드
+                     alert("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                     return false;
+                 }
+             });
+        	
+        } 
     </script>
 </head>
 <body>

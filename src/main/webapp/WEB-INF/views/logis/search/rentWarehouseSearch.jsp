@@ -16,6 +16,15 @@
 
     <meta content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0"
           name="viewport">
+          
+    <%-- Bootstrap core CSS --%>
+    <link rel="stylesheet" href="<c:url value ='/assets/libs/bootstrap-4.5.3/css/bootstrap.min.css'/>">
+    <%-- Material Design Bootstrap CSS --%>
+    <link rel="stylesheet" href="<c:url value='/js/core.min.js'/>">
+    <%-- Custom CSS --%>
+    <link rel="stylesheet" href="<c:url value='/css/content_logis.css'/>">
+    <%-- FontAwesome --%>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
 
     <%-- Reset CSS --%>
     <link rel="stylesheet" href="/css/reset.css">
@@ -29,6 +38,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
             addRowHandlers();
+            addRowHandlers2();
+            addRowHandlers3();
             console.log("${infoList}");
         });
 
@@ -50,7 +61,7 @@
 
                         const form = document.createElement('form');
                         form.setAttribute('method', 'POST');
-                        form.setAttribute('action', '/user/warehouse/searchDetail');
+                        form.setAttribute('action', '/user/warehouse/rentSearchDetail');
                         form.appendChild(logisOrderUid);
                         document.body.appendChild(form);
                         form.submit();
@@ -59,6 +70,64 @@
                 currentRow.onclick = createClickHandler(currentRow);
             }
         }
+        
+        function addRowHandlers2() {
+            const table = document.getElementById("tableListBefore");
+            const rows = table.getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                const currentRow = table.rows[i];
+                const createClickHandler = function (row) {
+                    return function () {
+                        const cell = row.getElementsByTagName("p")[0];
+                        const id = cell.innerHTML;
+
+                        console.log(id);
+
+                        const logisOrderUid = document.createElement("input");
+                        logisOrderUid.setAttribute("name", "orderInfoUid");
+                        logisOrderUid.setAttribute("value", id);
+
+                        const form = document.createElement('form');
+                        form.setAttribute('method', 'POST');
+                        form.setAttribute('action', '/user/warehouse/rentSearchDetail');
+                        form.appendChild(logisOrderUid);
+                        document.body.appendChild(form);
+                        form.submit();
+                    };
+                };
+                currentRow.onclick = createClickHandler(currentRow);
+            }
+        }
+        
+        function addRowHandlers3() {
+            const table = document.getElementById("currentTablelist");
+            const rows = table.getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                const currentRow = table.rows[i];
+                const createClickHandler = function (row) {
+                    return function () {
+                        const cell = row.getElementsByTagName("p")[0].getAttribute("value");
+                        const id = row.getElementsByTagName("p")[0].getAttribute("id");
+                        console.log(id);
+						if(id != ""){
+							const logisRfidUid = document.createElement("input");
+	                        logisRfidUid.setAttribute("name", "spaceUid");
+	                        logisRfidUid.setAttribute("value", cell);
+
+	                        const form = document.createElement('form');
+	                        form.setAttribute('method', 'POST');
+	                        form.setAttribute('action', '/user/warehouse/rentSpaceDetail');
+	                        form.appendChild(logisRfidUid);
+	                        document.body.appendChild(form);
+	                        form.submit();	
+						}
+                        
+                    };
+                };
+                currentRow.onclick = createClickHandler(currentRow);
+            }
+        }
+        
         
         
     </script>
@@ -108,7 +177,7 @@
         }
 
         .form-table {
-            margin-top: 4%;
+            margin-top: 1%;
             margin-bottom: 56px;
         }
 
@@ -150,6 +219,7 @@
             text-align: center;
             border-right: 1px solid lightgrey;
         }
+        
 
         p {
             margin: 0;
@@ -161,7 +231,19 @@
     <span class="header-title">내 창고 조회</span>
 </div>
 <div id="wrap">
-    <div class="section">
+	<ul class="nav nav-pills mt-3 ml-2" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="pill" href="#reserveList"><i class="fas fa-box mr-2"></i>예약 현황</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="pill" href="#currentList"><i class="fas fa-box mr-2"></i>창고 현황</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="pill" href="#beforeList"><i class="fas fa-box mr-2"></i>과거 내역</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+    <div class="section container tab-pane active" id="reserveList">
         <div class="form-table">
         	<p>예약 리스트</p>
             <table id="list">
@@ -191,6 +273,11 @@
                     </th>
                     <th scope="row" colspan="1" class="pl-0 pr-0">
                         <div class="table-top">
+                            <strong class="form-title">공간 크기</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
                             <strong class="form-title">금액</strong>
                         </div>
                     </th>
@@ -209,11 +296,15 @@
                             <p><c:out value="${data.orderInfoUid}"/></p>
                         </td>
                         <td>
-                            <p><c:out value="${data.warehouseName}"/></p>
+                            <p><c:out value="${data.companyName}"/></p>
                         </td>
 
                         <td>
                             <p style="white-space: pre-line"><c:out value="${data.startTime} ~ ${data.endTime}"/></p>
+                        </td>
+                        
+                        <td>
+                            <p><c:out value="${data.size}개"/></p>
                         </td>
 
                         <td>
@@ -233,7 +324,15 @@
                                 <c:when test="${data.status == 2}">
                                     <p>상품인수</p>
                                 </c:when>
-
+                                <c:when test="${data.status == 3}">
+                                    <p>입고</p>
+                                </c:when>
+                                <c:when test="${data.status == 4}">
+                                    <p>부분 출고</p>
+                                </c:when>
+                                <c:when test="${data.status == 5}">
+                                    <p>출고</p>
+                                </c:when>
                                 <c:when test="${data.status == 6}">
                                     <p>기간만료</p>
                                 </c:when>
@@ -245,8 +344,84 @@
                 </tbody>
             </table>
             <br>
+            </div>
+    </div>
+    <div class="section container tab-pane fade" id="currentList">
+        <div class="form-table">
+        	<p>창고 현황</p>
+            <table id="currentTablelist">
+                <colgroup>
+                    <col style="width: 10%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                    <col style="width: 20%">
+                    <col style="width: 20%">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top" style="border-left: 1px solid lightgrey;">
+                            <strong class="form-title">No</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
+                            <strong class="form-title">대여 기업</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
+                            <strong class="form-title">대여기간</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
+                            <strong class="form-title">입고 시간</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
+                            <strong class="form-title">출고 시간</strong>
+                        </div>
+                    </th>
+                    
+                </tr>
+                </thead>
+                
+                <tbody>
+                <c:forEach var="data" items="${spaceList}">
+                    <tr>
+                        <td>
+                            <p value="${data.spaceUid }" id="${data.rfidUid }"><c:out value="${data.spaceName}"/></p>
+                        </td>
+                        <td>
+                            <p><c:out value="${data.companyName}"/></p>
+                        </td>
+
+                        <td>
+                            <p style="white-space: pre-line"><c:out value="${data.startTime} ~ ${data.endTime}"/></p>
+                        </td>
+                        
+                        <td>
+                            <p><c:out value="${data.startDatetime}"/></p>
+                        </td>
+
+                        <td>
+                            <p><c:out value="${data.endDatetime}"/></p>
+                        </td>
+
+                    </tr>
+
+                </c:forEach>
+                </tbody>
+            </table>
+            <br>
+            </div>
+    </div>
+    <div class="section container tab-pane fade" id="beforeList">
+    	<div class="form-table">
             <p>과거 리스트</p>
-            <table id="list">
+            <table id="tableListBefore">
                 <colgroup>
                     <col style="width: 5%">
                     <col style="width: 20%">
@@ -273,6 +448,11 @@
                     </th>
                     <th scope="row" colspan="1" class="pl-0 pr-0">
                         <div class="table-top">
+                            <strong class="form-title">공간 크기</strong>
+                        </div>
+                    </th>
+                    <th scope="row" colspan="1" class="pl-0 pr-0">
+                        <div class="table-top">
                             <strong class="form-title">금액</strong>
                         </div>
                     </th>
@@ -290,11 +470,14 @@
                             <p><c:out value="${dataBefore.orderInfoUid}"/></p>
                         </td>
                         <td>
-                            <p><c:out value="${dataBefore.warehouseName}"/></p>
+                            <p><c:out value="${dataBefore.companyName}"/></p>
                         </td>
 
                         <td>
                             <p style="white-space: pre-line"><c:out value="${dataBefore.startTime} ~ ${dataBefore.endTime}"/></p>
+                        </td>
+                        <td>
+                            <p><c:out value="${dataBefore.size}개"/></p>
                         </td>
 
                         <td>
@@ -312,9 +495,17 @@
                                 </c:when>
 
                                 <c:when test="${dataBefore.status == 2}">
-                                    <p>상품인수</p>
+                                    <p>입고전</p>
                                 </c:when>
-
+                                <c:when test="${dataBefore.status == 3}">
+                                     <p>입고</p>
+                                </c:when>
+                                <c:when test="${dataBefore.status == 4}">
+                                    <p>부분 출고</p>
+                                </c:when>
+                                <c:when test="${dataBefore.status == 5}">
+                                    <p>출고</p>
+                                </c:when>
                                 <c:when test="${dataBefore.status == 6}">
                                     <p>기간만료</p>
                                 </c:when>
@@ -325,6 +516,7 @@
                 </c:forEach>
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 </div>

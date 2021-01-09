@@ -17,6 +17,29 @@ public class WarehouseSearchInfo {
     private String warehouseAddress;
     private String payType;
     private String isPay;
+    private String companyName;
+    private String managerName;
+    private String phoneNumber;
+    
+    
+	public String getCompanyName() {
+		return companyName;
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+	public String getManagerName() {
+		return managerName;
+	}
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 	public String getOrderInfoUid() {
 		return orderInfoUid;
 	}

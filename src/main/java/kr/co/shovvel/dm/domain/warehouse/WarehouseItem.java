@@ -9,6 +9,25 @@ public class WarehouseItem {
     private String outDate;
     private int state;
     private String itemInfo;
+    private String spaceName;
+    private String rfidUid;
+    
+    
+    public String getSpaceName() {
+		return spaceName;
+	}
+
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
+	}
+
+	public String getRfidUid() {
+		return rfidUid;
+	}
+
+	public void setRfidUid(String rfidUid) {
+		this.rfidUid = rfidUid;
+	}
 
     public String getItemUid() {
         return itemUid;

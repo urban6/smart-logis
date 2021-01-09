@@ -8,6 +8,7 @@ import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
 import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseLendInfo;
 import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseOrderInfo;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseInfo;
+import kr.co.shovvel.dm.domain.warehouse.WarehouseItem;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseSpace;
 import kr.co.shovvel.dm.service.logis.warehouse.apply.WarehouseApplyService;
 import org.apache.ibatis.annotations.Param;
@@ -24,6 +25,7 @@ import org.apache.log4j.Logger;
 import kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO;
 import kr.co.shovvel.dm.service.logis.warehouse.WarehouseService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -138,20 +140,70 @@ public class WarehouseController {
         return mav;
     }
     
-    @RequestMapping("/rentSearch")
-    public ModelAndView rentSearch(HttpServletResponse response, HttpServletRequest request, Model model) {
+    @RequestMapping("/findWarehouseUid")
+    public void findWarehouseUid(HttpServletResponse response, HttpServletRequest request, Model model) {
         response.setHeader("Cache-Control", "no-cache");
 
         HttpSession session = request.getSession();
         String userUid = (String) session.getAttribute("userUid");
 
-        List<WarehouseSearchInfo> infoList = warehouseService.serchRentWarehouse(userUid);
-        List<WarehouseSearchInfo> infoListBefore = warehouseService.serchRentWarehouseBefore(userUid);
+        String warehouseUid = warehouseService.findWarehouseUid(userUid);
+        logger.debug("warehouseUid: "+warehouseUid);
+        if(warehouseUid != null) {
+        	model.addAttribute("warehouseUid", warehouseUid);
+        	logger.debug("warehouseUid: "+warehouseUid);
+        	model.addAttribute("code", 0);
+        }else {
+        	model.addAttribute("code", 1);
+        }
+
+    }
+    
+    @RequestMapping("/rentSearch")
+    public ModelAndView rentSearch(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+        // home 화면에서 고치면 uid 받아서 해야함
+//        String warehouseUid =request.getParameter("warehouseUid");
+        String warehouseUid ="1";
+        
+        List<WarehouseSearchInfo> infoList = warehouseService.serchRentWarehouse(warehouseUid);
+        List<WarehouseSearchInfo> infoListBefore = warehouseService.serchRentWarehouseBefore(warehouseUid);
+        List<WarehouseSpace> spaceList = warehouseService.searchWarehouseSpace(warehouseUid);
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("logis/search/rentWarehouseSearch");
         mav.addObject("infoList", infoList);
+        mav.addObject("spaceList", spaceList);
         mav.addObject("infoListBefore", infoListBefore);
+        return mav;
+    }
+    
+    @RequestMapping("/rentSearchDetail")
+    public ModelAndView rentSearchDetail(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        String orderInfoUid = request.getParameter("orderInfoUid");
+
+        WarehouseSearchInfo info = warehouseService.searchRentWarehouseOrderInfoDetail(orderInfoUid);
+        List<WarehouseItem> itemList = warehouseService.rentWarehouseItemListDetail(orderInfoUid);
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("info", info);
+        mav.addObject("itemList",itemList);
+        mav.setViewName("logis/search/rentWarehouseSearchDetail");
+        return mav;
+    }
+    
+    @RequestMapping("/rentSpaceDetail")
+    public ModelAndView rentSpaceDetail(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        String spaceUid = request.getParameter("spaceUid");
+        
+        List<HashMap<String, Object>> itemList = warehouseService.warehouseSpaceDetail(spaceUid);
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("itemList",itemList);
+        mav.setViewName("logis/search/rentSpaceDetail");
         return mav;
     }
 
