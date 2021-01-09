@@ -29,6 +29,9 @@
     <%-- FontAwesome --%>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
 
+    <%--  Bootstrap 5.0 --%>
+    <link rel="stylesheet" href="<c:url value='/assets/libs/bootstrap-5.0.0/css/bootstrap.min.css'/>">
+
     <%-- JQuery, Bootstrap JS  --%>
     <script src="<c:url value='/js/jquery-3.5.1.min.js'/>"></script>
     <script src="<c:url value ='/assets/libs/bootstrap-4.5.3/js/bootstrap.min.js'/>"></script>
@@ -50,8 +53,51 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $("#btnAddItem").hide();
+            // 대여중인 창고가 없을 경우, 창고를 먼저 빌려라는 알림창이 떠야한다.
+
+            // 회원정보 자동완성
+            $('input[name=toWhseUserInfo]').click(function () {
+                const value = $(this).val();
+                if (value == 0) {
+                    $("#toWhseSenderName").val("${userInfo.managerName}");
+                    $("#toWhseSenderPhone").val("${userInfo.phoneNumber}");
+                    $("#toWhseSenderPostcode").val("${userInfo.postcode}");
+                    $("#toWhseSenderAddress").val("${userInfo.address}");
+                    $("#toWhseSenderDetailAddress").val("${userInfo.detailAddress}");
+                } else {
+                    $("#toWhseSenderName").val("");
+                    $("#toWhseSenderPhone").val("");
+                    $("#toWhseSenderPostcode").val("");
+                    $("#toWhseSenderAddress").val("");
+                    $("#toWhseSenderDetailAddress").val("");
+                }
+            });
+
+            // 배송 물품 타입 설정
+            $('input[name=toWhseInfoType]').click(function () {
+                const value = $(this).val();
+                if (value == 0) {
+                    // 팔렛트를 보낼 때
+                    $("#containerPalette").css("display", "block");
+                    $("#containerBox").css("display", "none");
+                    $("#toWhseBoxCount").val('');
+                } else {
+                    // 박스를 보낼 때
+                    $("#containerPalette").css("display", "none");
+                    $("#containerBox").css("display", "block");
+                    $("#toWhsePaletteCount").val('');
+                }
+            });
+
+            $("#btnAddItem").show();
             addInputItem(true);
+
+            // 신청하기
+            $('#btnToWhseApply').click(function (key) {
+                if(validate()) {
+                    payOrder();
+                }
+            });
 
             // 대여중인 창고가 없을 경우, 라디오 버튼 비활성화
             <c:if test="${warehouseNameList.size() eq 0}">
@@ -177,6 +223,43 @@
             }
         }
 
+        function validate() {
+            if ($('#toWhseSenderName').val() == "") {
+                alert("담당자를 입력해주세요.");
+                $('#toWhseSenderName').focus();
+                return false;
+            }
+
+            if ($('#toWhseSenderPhone').val() == "") {
+                alert("연락처를 입력해주세요.");
+                $('#toWhseSenderPhone').focus();
+                return false;
+            }
+
+            if ($('#toWhseSenderPostcode').val() == "" || $('#toWhseSenderAddress').val() == "") {
+                alert("주소를 입력해주세요.");
+                return false;
+            }
+
+            const itemType = $('input:radio[name=toWhseInfoType]:checked').val();
+            if (itemType == "0") { // 팔렛트 배송
+                if ($('#toWhsePaletteCount').val() == "") {
+                    alert("팔렛트 수를 입력해주세요.");
+                    $('#toWhsePaletteCount').focus();
+                    return false;
+                }
+            } else {
+                // 박스 배송
+                if ($('#toWhseBoxCount').val() == "") {
+                    alert("박스 수를 입력해주세요.");
+                    $('#toWhseBoxCount').focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         // 택배 신청하기
         function requestApply() {
             if (validate()) {
@@ -194,7 +277,7 @@
         /**
          * 입력 받은 데이터 검증
          */
-        function validate() {
+        function validate_prev() {
             // ---------------------- 보내는 사람 데이터 입력 확인 [ 이름, 연락처, 받는 타입(0:일반 배송, 1:창고에서 배송)----------------------
             if ($("#senderName").val() == "") {
                 alert("보내는 분의 이름을 입력해주세요.");
@@ -307,12 +390,71 @@
          * 창고로 배송할 때 사용
          */
         function payOrder() {
+
+            // 출발지 주소 설정
+            let senderAddress;
+            if ($("#senderDetailAddress").val() == "") {
+                senderAddress = $("#toWhseSenderAddress").val();
+            } else {
+                senderAddress = $("#toWhseSenderAddress").val() + ' ' + $("#toWhseSenderDetailAddress").val();
+            }
+
+            // 도착지[창고] 주소 설정
+            const address = $("#toWhseSelect").val();
+            const arr = address.split(",");
+            let receiverPostcode = arr[0];
+            let receiverAddress = arr[1];
+            let warehouseOrderUid = arr[2];
+
+            // 물품 정보
+            let itemInfo = "";
+            const length = $("input[name=itemInfo]").length;
+            for (let i = 0; i < length; i++) {
+                itemInfo += $("input[name=itemInfo]").eq(i).val();
+                itemInfo += ",";
+            }
+            itemInfo = itemInfo.slice(0, -1);
+
+            $.ajax("/user/logis/payOrder",
+                {
+                    method: 'POST',
+                    data: {
+                        "senderName": $("#toWhseSenderName").val(),
+                        "senderPhone": $("#toWhseSenderPhone").val(),
+                        "senderAddress": senderAddress,
+                        "senderPostcode": $("#toWhseSenderPostcode").val(),
+                        "receiverName": $("#toWhseSenderName").val(),
+                        "receiverPhone": $("#toWhseSenderPhone").val(),
+                        "receiverAddress": receiverAddress,
+                        "receiverPostcode": receiverPostcode,
+                        "boxCount": Number($("#toWhseBoxCount").val()),
+                        "paletteCount": Number($("#toWhsePaletteCount").val()),
+                        "wishDeliveryDatetime": $("#wishDeliveryDatetime").val(),
+                        "itemInfo": itemInfo,
+                        "warehouseOrderUid": warehouseOrderUid
+                    },
+                    dataType: 'JSON'
+                }
+            ).done(function (data) {
+                const result = data.result;
+                if (result) {
+                    movePayPage(data.isStatus, data.boxCount, data.paletteCount);
+                }
+            });
+        }
+
+        /**
+         * 창고로 배송할 때 사용
+         * Deprecated
+         */
+        function payOrder_prev() {
             // 보내는 분 연락처, 주소 설정
             const senderPhone = $("#senderPhone1").val() + $("#senderPhone2").val() + $("#senderPhone3").val();
             const senderAddress = $("#senderAddress").val() + " " + $("#senderDetailAddress").val();
 
             // 받는 분 연락처 주소 설정
             const receiverPhone = $("#receiverPhone1").val() + $("#receiverPhone2").val() + $("#receiverPhone3").val();
+
             const address = $("#receiveWarehouse").val();
             const arr = address.split(",");
             $("#receiverPostcode").val(arr[0]);
@@ -459,7 +601,7 @@
             height: 93vh;
             background-color: white;
             margin: 0 auto;
-            margin-top: 1000px;
+            margin-top: 1500px;
         }
 
         /* 화면 너비 0 ~ 768px */
@@ -662,7 +804,7 @@
             position: absolute;
             width: 700px;
             height: auto;
-            margin-top: -50px;
+            /*margin-top: -50px;*/
             background: #fff;
             color: #000;
             border-radius: 0 0 8px 8px;
@@ -672,12 +814,18 @@
             margin-bottom: 50px;
         }
 
-        .tab-content button {
-            border-radius: 15px;
-            width: 100px;
-            margin: 0 auto;
+        /*.tab-content .input-apply {*/
+        /*    width: 120px;*/
+        /*    margin: 0 auto;*/
+        /*    float: right;*/
+        /*}*/
+
+        .input-apply {
+            width: 150px;
+            margin-right: 15px;
             float: right;
         }
+
 
         .i-size-1 {
             color: #8b62ff;
@@ -692,95 +840,145 @@
 </div>
 <div class="content">
     <%-- 상단 탭 --%>
-    <ul class="nav nav-pills" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" data-toggle="pill" href="#toWarehouse"><i class="fas fa-truck mr-2"></i>공유창고로 배송</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="pill" href="#toWarehouse"><i class="fas fa-truck mr-2"></i>공유창고에서 배송</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="pill" href="#normal"><i class="fas fa-truck mr-2"></i>일반 배송</a>
-        </li>
-    </ul>
+    <%--    <ul class="nav nav-pills" role="tablist">--%>
+    <%--        <li class="nav-item">--%>
+    <%--            <a class="nav-link active" data-toggle="pill" href="#toWarehouse"><i class="fas fa-truck mr-2"></i>공유창고로 배송</a>--%>
+    <%--        </li>--%>
+    <%--        <li class="nav-item">--%>
+    <%--            <a class="nav-link" data-toggle="pill" href="#toWarehouse"><i class="fas fa-truck mr-2"></i>공유창고에서 배송</a>--%>
+    <%--        </li>--%>
+    <%--        <li class="nav-item">--%>
+    <%--            <a class="nav-link" data-toggle="pill" href="#normal"><i class="fas fa-truck mr-2"></i>일반 배송</a>--%>
+    <%--        </li>--%>
+    <%--    </ul>--%>
 
     <%-- 탭에 대한 콘텐츠 --%>
     <div class="tab-content">
         <%-- 공유 창고 --%>
         <div id="toWarehouse" class="container tab-pane active">
             <form>
+                <div class="form-group col-12 mt-4">
+                    <h3>예약 정보</h3>
+                </div>
                 <div class="form-group form-check-inline col-12" style="padding-left: 15px;">
-                    <h3>보내는 분</h3>
-                    <input type="checkbox" class="form-check-input ml-4" id="exampleCheck1">
-                    <label class="form-check-label" for="exampleCheck1">등록된 회원정보 사용</label>
-                </div>
-                <div class="form-group col-12">
-                    <label for="senderName">이름<i class="fas fa-asterisk i-size-1"></i></label>
-                    <input type="email" class="form-control" id="senderName"
-                           placeholder="이름">
-                </div>
-                <div class="form-group col-12">
-                    <label for="senderPhone">연락처<i class="fas fa-asterisk i-size-1"></i></label>
-                    <input type="tel" class="form-control" id="senderPhone" onkeyup="specialCharRemove(this)"
-                           placeholder="">
-                    <small id="emailHelp6" class="form-text text-muted">- 를 빼고 입력해주세요.</small>
-                </div>
-                <div class="form-group col-12">
-                    <label for="senderPostcode">주소<i class="fas fa-asterisk i-size-1"></i></label>
-                    <div class="div-horizon-box">
-                        <input type="text" class="form-control" id="senderPostcode" placeholder="우편번호"
-                               autocomplete="chrome-off">
-                        <input id="btnReqSenderAddr" name="btnReqSenderAddr" type="button"
-                               class="btn btn-logis-primary button-type-1" value="우편번호 찾기">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="toWhseUserInfo" id="defaultInfo" value="0"
+                               checked>
+                        <label class="form-check-label" for="defaultInfo">기존정보</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="toWhseUserInfo" id="newInfo" value="1">
+                        <label class="form-check-label" for="newInfo">신규정보</label>
                     </div>
                 </div>
                 <div class="form-group col-12">
-                    <input type="text" class="form-control" id="senderAddress" placeholder="주소"
-                           autocomplete="chrome-off">
+                    <label for="toWhseSenderName">담당자<i class="fas fa-asterisk i-size-1"></i></label>
+                    <input type="text" class="form-control" id="toWhseSenderName"
+                           placeholder="담당자" value="${userInfo.managerName}">
                 </div>
                 <div class="form-group col-12">
-                    <input type="text" class="form-control" id="senderDetailAddress" placeholder="상세주소">
+                    <label for="toWhseSenderPhone">연락처<i class="fas fa-asterisk i-size-1"></i></label>
+                    <input type="tel" class="form-control" id="toWhseSenderPhone" onkeyup='specialCharRemove(this)'
+                           placeholder="- 를 빼고 입력해주세요." value="${userInfo.phoneNumber}">
                 </div>
-                <button type="submit" class="btn btn-primary">신청하기</button>
+                <div class="form-group col-12">
+                    <label for="toWhseSenderPostcode">주소<i class="fas fa-asterisk i-size-1"></i></label>
+                    <div class="div-horizon-box">
+                        <input type="text" class="form-control" id="toWhseSenderPostcode" placeholder="우편번호"
+                               autocomplete="chrome-off" value="${userInfo.postcode}">
+                        <input id="btnReqSenderAddr" name="btnReqSenderAddr" type="button"
+                               class="btn btn-primary button-type-1" value="우편번호 찾기">
+                    </div>
+                </div>
+                <div class="form-group col-12">
+                    <input type="text" class="form-control" id="toWhseSenderAddress" placeholder="주소"
+                           autocomplete="chrome-off" value="${userInfo.address}">
+                </div>
+                <div class="form-group col-12">
+                    <input type="text" class="form-control" id="toWhseSenderDetailAddress" placeholder="상세주소"
+                           value="${userInfo.detailAddress}">
+                </div>
+
+                <div class="form-group col-12">
+                    <label for="toWhseSelect">보낼 창고선택<i class="fas fa-asterisk i-size-1"></i></label>
+                    <select class="form-select" id="toWhseSelect">
+                        <c:forEach var="data" items="${warehouseNameList}">
+                            <option value="${data.warehousePostcode},${data.warehouseAddress},${data.orderInfoUid}">${data.warehouseName}
+                                (대여기간: ${data.startDatetime} ~ ${data.endDatetime})
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+                <div class="form-group col-12 mt-4">
+                    <h3>물류 정보</h3>
+                </div>
+                <div class="btn-group" role="group" style="margin-left: 15px"
+                     aria-label="Basic radio toggle button group">
+                    <input type="radio" class="btn-check" name="toWhseInfoType" id="radioPalette" autocomplete="off"
+                           checked value="0">
+                    <label class="btn btn-outline-primary" style="border-bottom-left-radius: 4px; border-top-left-radius: 4px;" for="radioPalette">팔렛트 배송</label>
+                    <input type="radio" class="btn-check" name="toWhseInfoType" id="radioBox" autocomplete="off"
+                           value="1">
+                    <label class="btn btn-outline-primary" for="radioBox">박스 배송</label>
+                </div>
+                <div id="containerPalette" class="form-group col-12">
+                    <label for="toWhsePaletteCount">팔레트 개수<i class="fas fa-asterisk i-size-1"></i></label>
+                    <input type="number" class="form-control" id="toWhsePaletteCount" placeholder="">
+                </div>
+                <div id="containerBox" class="form-group col-12" style="display: none;">
+                    <label for="toWhseBoxCount">박스 개수<i class="fas fa-asterisk i-size-1"></i></label>
+                    <input type="number" class="form-control" id="toWhseBoxCount" placeholder="">
+                </div>
+                <div class="form-group col-12">
+                        <label for="wishDeliveryDatetime">희망 배송 날짜<i class="fas fa-asterisk i-size-1"></i></label>
+                        <input class="form-control mr-3" type="datetime-local" value=""
+                               id="wishDeliveryDatetime" max="9999-12-31">
+                </div>
+                <div id="itemContainer" class="form-group col-12">
+                    <%-- 여기 --%>
+                    <input type="button" id="btnAddItem" name="bntAddItem" class="btn btn-primary"
+                           value="물품 추가하기"/>
+                </div>
+                <input id="btnToWhseApply" type="button" class="btn btn-primary input-apply" value="신청하기">
             </form>
         </div>
 
         <%-- 일반 배송 --%>
-        <div id="normal" class="container tab-pane fade">
-            <form>
-                <div class="form-group">
-                    <label for="InputName">Full Name</label>
-                    <input type="text" class="form-control is-valid" id="InputName" placeholder="Full Name">
-                    <small id="emailHelp1" class="form-text text-muted">We'll never share your email with anyone
-                        else.</small>
-                </div>
-                <div class="form-group">
-                    <label for="InputUsername">Username</label>
-                    <input type="text" class="form-control is-valid" id="InputUsername" placeholder="Username">
-                    <small id="emailHelp2" class="form-text text-muted">We'll never share your email with anyone
-                        else.</small>
-                </div>
-                <div class="form-group">
-                    <label for="exampleFormControlInput2">Email address</label>
-                    <input type="email" class="form-control is-valid" id="exampleFormControlInput2"
-                           placeholder="name@example.com">
-                    <small id="emailHelp3" class="form-text text-muted">We'll never share your email with anyone
-                        else.</small>
-                </div>
-                <div class="form-group">
-                    <label for="exampleInputPassword2">Password</label>
-                    <input type="password" class="form-control is-invalid" id="exampleInputPassword2"
-                           placeholder="Password">
-                    <small id="emailHelp4" class="form-text text-muted">Password incorrect.</small>
-                </div>
-                <div class="form-group">
-                    <label for="exampleInputPasswordVer">Verify Password</label>
-                    <input type="password" class="form-control is-invalid" id="exampleInputPasswordVer"
-                           placeholder="Password">
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-        </div>
+        <%--        <div id="normal" class="container tab-pane fade">--%>
+        <%--            <form>--%>
+        <%--                <div class="form-group">--%>
+        <%--                    <label for="InputName">Full Name</label>--%>
+        <%--                    <input type="text" class="form-control is-valid" id="InputName" placeholder="Full Name">--%>
+        <%--                    <small id="emailHelp1" class="form-text text-muted">We'll never share your email with anyone--%>
+        <%--                        else.</small>--%>
+        <%--                </div>--%>
+        <%--                <div class="form-group">--%>
+        <%--                    <label for="InputUsername">Username</label>--%>
+        <%--                    <input type="text" class="form-control is-valid" id="InputUsername" placeholder="Username">--%>
+        <%--                    <small id="emailHelp2" class="form-text text-muted">We'll never share your email with anyone--%>
+        <%--                        else.</small>--%>
+        <%--                </div>--%>
+        <%--                <div class="form-group">--%>
+        <%--                    <label for="exampleFormControlInput2">Email address</label>--%>
+        <%--                    <input type="email" class="form-control is-valid" id="exampleFormControlInput2"--%>
+        <%--                           placeholder="name@example.com">--%>
+        <%--                    <small id="emailHelp3" class="form-text text-muted">We'll never share your email with anyone--%>
+        <%--                        else.</small>--%>
+        <%--                </div>--%>
+        <%--                <div class="form-group">--%>
+        <%--                    <label for="exampleInputPassword2">Password</label>--%>
+        <%--                    <input type="password" class="form-control is-invalid" id="exampleInputPassword2"--%>
+        <%--                           placeholder="Password">--%>
+        <%--                    <small id="emailHelp4" class="form-text text-muted">Password incorrect.</small>--%>
+        <%--                </div>--%>
+        <%--                <div class="form-group">--%>
+        <%--                    <label for="exampleInputPasswordVer">Verify Password</label>--%>
+        <%--                    <input type="password" class="form-control is-invalid" id="exampleInputPasswordVer"--%>
+        <%--                           placeholder="Password">--%>
+        <%--                </div>--%>
+        <%--                <button type="submit" class="btn btn-primary">Submit</button>--%>
+        <%--            </form>--%>
+        <%--        </div>--%>
     </div>
 </div>
 <div id="wrap">
@@ -870,7 +1068,7 @@
                                        value="" maxlength="30" readonly>
 
                                 <input id="btnReqSenderAddr-prev" name="btnReqSenderAddr-prev" type="button"
-                                       class="btn btn-logis-primary button-type-1" value="우편번호 찾기">
+                                       class="btn btn-primary" value="우편번호 찾기">
                             </div>
                             <div class="form-table-wrap">
                                 <input class="form-control input-lg input-type-1 input-address" type="text"
@@ -937,7 +1135,7 @@
                                 </label>
                                 <label for="toWarehouse">
                                     <input class="input-radio" type="radio" value="1" name="receiveAddressType"
-                                           id="toWarehouse"
+                                           id="toWarehouse1"
                                            style="width: 1.1em; height: 1.1em; margin-right: 5%; align-self: center;">
                                     공유 창고로 배송
                                 </label>
@@ -1110,7 +1308,7 @@
                         <td>
                             <div class="form-table-wrap">
                                 <input class="form-control mr-3" type="datetime-local" value=""
-                                       id="wishDeliveryDatetime" max="9999-12-31">
+                                       id="wishDeliveryDatetime-prev" max="9999-12-31">
                             </div>
                         </td>
                     </tr>
@@ -1119,9 +1317,9 @@
                             <label>물품 설명</label>
                         </th>
                         <td>
-                            <div id="itemContainer" class="form-group">
+                            <div id="itemContainer-prev" class="form-group">
                                 <%-- 여기 --%>
-                                <input type="button" id="btnAddItem" name="bntAddItem" class="btn btn-logis-primary"
+                                <input type="button" id="btnAddItem-prev" name="bntAddItem-prev" class="btn btn-logis-primary"
                                        value="추가하기"/>
                             </div>
                         </td>

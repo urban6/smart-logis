@@ -156,7 +156,8 @@
             logisUser.phoneNumber = $("#phoneNumber").val();
             logisUser.companyName = $("#companyName").val();
             logisUser.postcode = $("#postcode").val();
-            logisUser.address = $("#address").val() + " " + $("#detailAddress").val();
+            logisUser.address = $("#address").val();
+            logisUser.detailAddress = $("#detailAddress").val();
 
             $.ajax("/user/signUp/signUpAction",
                 {

@@ -3,6 +3,7 @@ package kr.co.shovvel.dm.controller.logis.logis;
 import kr.co.shovvel.dm.common.Config;
 import kr.co.shovvel.dm.common.Consts;
 import kr.co.shovvel.dm.domain.logis.apply.LogisOrderInfo;
+import kr.co.shovvel.dm.domain.logis.apply.LogisUserInfo;
 import kr.co.shovvel.dm.domain.logis.search.LogisSearchInfo;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseInfo;
 import kr.co.shovvel.dm.service.logis.logis.LogisService;
@@ -42,6 +43,9 @@ public class LogisController {
     @Autowired
     private PayService payService;
 
+    /**
+     * 창고로 물류 배송신청
+     */
     @RequestMapping("/apply")
     public ModelAndView apply(HttpServletResponse response, HttpServletRequest request, Model model) {
         response.setHeader("Cache-Control", "no-cache");
@@ -52,11 +56,36 @@ public class LogisController {
         // 현재 대여하고 있는 창고 리스트
         List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
 
-        // 회원의 주소와 연락처를 가져온다.
+        // 회원의 기본적인 정보를 가져온다 (이름, 연락처, 우편번호, 주소, 상세주소)
+        LogisUserInfo info = logisService.searchUserAddress(userUid);
 
         ModelAndView mav = new ModelAndView();
         mav.addObject("warehouseNameList", warehouseNameList);
+        mav.addObject("userInfo", info);
         mav.setViewName("logis/apply/logisApply");
+        return mav;
+    }
+
+    /**
+     * 창고로 물류 배송신청
+     */
+    @RequestMapping("/normalApply")
+    public ModelAndView normalApply(HttpServletResponse response, HttpServletRequest request, Model model) {
+        response.setHeader("Cache-Control", "no-cache");
+
+        HttpSession session = request.getSession();
+        String userUid = (String) session.getAttribute("userUid");
+
+        // 현재 대여하고 있는 창고 리스트
+        List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
+
+        // 회원의 기본적인 정보를 가져온다 (이름, 연락처, 우편번호, 주소, 상세주소)
+        LogisUserInfo info = logisService.searchUserAddress(userUid);
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("warehouseNameList", warehouseNameList);
+        mav.addObject("userInfo", info);
+        mav.setViewName("logis/apply/logisNormalApply");
         return mav;
     }
 
@@ -122,6 +151,7 @@ public class LogisController {
 
     @RequestMapping("/payOrder")
     public void payOrder(HttpServletRequest request, @ModelAttribute LogisOrderInfo info, Model model) {
+
         // 아직 추가되지 않은 정보 추가
         HttpSession session = request.getSession();
         String userUid = (String) session.getAttribute("userUid");
@@ -142,7 +172,7 @@ public class LogisController {
         }
 
         // DB에 물류 신청 데이터 추가
-        logisService.applyAction(info);
+        logisService.applyActionToWarehouse(info);
 
         if (info.getLogisOrderUid() != null) {
             // FIXME: 2020/12/11 - 일반 박스 배송은 3,500원 팔레트 배송은 50,000원이다.

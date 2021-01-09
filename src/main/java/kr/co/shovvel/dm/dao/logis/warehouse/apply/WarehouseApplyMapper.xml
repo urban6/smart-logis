@@ -12,13 +12,17 @@
 
     <!-- 현재 사용자가 빌리고 있는 창고 리스트를 조회한다. -->
     <select id="getUsingWarehouseName" parameterType="string" resultType="kr.co.shovvel.dm.domain.warehouse.WarehouseInfo">
-        SELECT w.WAREHOUSE_UID AS WAREHOUSE_UID, w.WAREHOUSE_NAME AS WAREHOUSE_NAME,
-               w.WAREHOUSE_ADDRESS AS WAREHOUSE_ADDRESS, w.WAREHOUSE_POSTCODE AS WAREHOUSE_POSTCODE
+        SELECT woi.ORDER_INFO_UID,
+        w.WAREHOUSE_UID,
+        w.WAREHOUSE_NAME,
+        w.WAREHOUSE_ADDRESS,
+        w.WAREHOUSE_POSTCODE,
+        DATE(START_TIME) START_DATETIME,
+        DATE(END_TIME) END_DATETIME
         FROM warehouse_order_info AS woi
         JOIN warehouse AS w ON woi.WAREHOUSE_UID = w.WAREHOUSE_UID
-        WHERE USER_UID = 1
-        AND NOW() BETWEEN START_TIME AND END_TIME
-        GROUP BY w.WAREHOUSE_UID;
+        WHERE USER_UID = #{userUid}
+        AND NOW() BETWEEN START_TIME AND END_TIME;
     </select>
 
     <!-- 사용자가 설정한 기간과 공간에 맞는 창고들을 조회한다. -->

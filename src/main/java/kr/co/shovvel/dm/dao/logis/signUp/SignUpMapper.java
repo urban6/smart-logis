@@ -12,5 +12,4 @@ public interface SignUpMapper {
     void insertUser(LogisUser logisUser);
 
     void insertUserCompany(UserCompany userCompany);
-
 }

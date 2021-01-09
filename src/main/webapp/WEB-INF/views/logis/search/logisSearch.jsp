@@ -19,12 +19,12 @@
 
     <%-- Reset CSS --%>
     <link rel="stylesheet" href="/css/reset.css">
+    <%--  Bootstrap 5.0 CSS--%>
+    <link rel="stylesheet" href="<c:url value='/assets/libs/bootstrap-5.0.0/css/bootstrap.min.css'/>">
 
-    <%-- Bootstrap, JQuery Library --%>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <%-- JQuery, Bootstrap JS  --%>
+    <script src="<c:url value='/js/jquery-3.5.1.min.js'/>"></script>
+    <script src="<c:url value ='/assets/libs/bootstrap-5.0.0/js/bootstrap.min.js'/>"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -38,21 +38,21 @@
                 const currentRow = table.rows[i];
                 const createClickHandler = function (row) {
                     return function () {
-                        const cell = row.getElementsByTagName("p")[0];
+                        const cell = row.getElementsByTagName("th")[0];
                         const id = cell.innerHTML;
 
-                        console.log(id);
+                        if (Number(id) > 0) {
+                            const logisOrderUid = document.createElement("input");
+                            logisOrderUid.setAttribute("name", "logisOrderUid");
+                            logisOrderUid.setAttribute("value", id);
 
-                        const logisOrderUid = document.createElement("input");
-                        logisOrderUid.setAttribute("name", "logisOrderUid");
-                        logisOrderUid.setAttribute("value", id);
-
-                        const form = document.createElement('form');
-                        form.setAttribute('method', 'POST');
-                        form.setAttribute('action', '/user/logis/searchDetail');
-                        form.appendChild(logisOrderUid);
-                        document.body.appendChild(form);
-                        form.submit();
+                            const form = document.createElement('form');
+                            form.setAttribute('method', 'POST');
+                            form.setAttribute('action', '/user/logis/searchDetail');
+                            form.appendChild(logisOrderUid);
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
                     };
                 };
                 currentRow.onclick = createClickHandler(currentRow);
@@ -60,17 +60,12 @@
         }
     </script>
     <style>
-        @font-face {
-            font-family: 'gimhae-font-regular';
-            src: url('../../../../fonts/GimhaeGayaR.ttf');
-        }
-
         body {
-            font-family: 'gimhae-font-regular', serif !important;
+
         }
 
         #wrap {
-            width: 1080px;
+            width: 900px;
             background-color: white;
             margin: 0 auto;
         }
@@ -101,8 +96,8 @@
 
         .section {
             width: 100%;
-            height: 92vh;
-            padding-top: 5%;
+            padding-top: 3%;
+            padding-bottom: 5%;
         }
 
         .form-table {
@@ -129,7 +124,7 @@
         }
 
         td {
-            padding: 20px 10px;
+            padding: 30px 10px;
             border-bottom: 1px solid #ebebeb;
             text-align: center;
         }
@@ -163,103 +158,71 @@
 </div>
 <div id="wrap">
     <div class="section">
-        <div class="form-table">
-            <table id="list">
-                <colgroup>
-                    <col style="width: 10%">
-                    <col style="width: 20%">
-                    <col style="width: 20%">
-                    <col style="width: 20%">
-                    <col style="width: 10%">
-                </colgroup>
-                <thead>
+        <table id="list" class="table table-hover">
+            <colgroup>
+                <col style="width: 10%">
+                <col style="width: 20%">
+                <col style="width: 20%">
+                <col style="width: 20%">
+                <col style="width: 10%">
+            </colgroup>
+            <thead>
+            <tr>
+                <th scope="col" class="p-3">접수번호</th>
+                <th scope="col" class="p-3">신청일</th>
+                <th scope="col" class="p-3">배송상태</th>
+                <th scope="col" class="p-3">처리일시</th>
+                <th scope="col" class="p-3">받는분</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach var="data" items="${infoList}">
                 <tr>
-                    <th scope="row" colspan="1" class="pl-0 pr-0">
-                        <div class="table-top" style="border-left: 1px solid lightgrey;">
-                            <strong class="form-title">접수번호</strong>
-                        </div>
-                    </th>
-                    <th scope="row" colspan="1" class="pl-0 pr-0">
-                        <div class="table-top">
-                            <strong class="form-title">신청일</strong>
-                        </div>
-                    </th>
-                    <th scope="row" colspan="1" class="pl-0 pr-0">
-                        <div class="table-top">
-                            <strong class="form-title">배송상태</strong>
-                        </div>
-                    </th>
-                    <th scope="row" colspan="1" class="pl-0 pr-0">
-                        <div class="table-top">
-                            <strong class="form-title">처리일시</strong>
-                        </div>
-                    </th>
-                    <th scope="row" colspan="1" class="pl-0 pr-0">
-                        <div class="table-top">
-                            <strong class="form-title">받는 분</strong>
-                        </div>
-                    </th>
+                    <th scope="row" class="p-3"><c:out value="${data.logisOrderUid}"/></th>
+                    <td><c:out value="${data.requestTime}"/></td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${data.status == 0}">
+                                접수완료
+                            </c:when>
+
+                            <c:when test="${data.status == 1}">
+                                결제완료
+                            </c:when>
+
+                            <c:when test="${data.status == 2}">
+                                결제완료
+                            </c:when>
+
+                            <c:when test="${data.status == 3}">
+                                상품인수
+                            </c:when>
+
+                            <c:when test="${data.status == 4}">
+                                배송시작
+                            </c:when>
+
+                            <c:when test="${data.status == 5}">
+                                배송완료
+                            </c:when>
+                        </c:choose>
+                    </td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${not empty data.arriveTime}">
+                                <p><c:out value="${data.arriveTime}"/></p>
+                            </c:when>
+
+                            <c:when test="${empty data.arriveTime}">
+                                <p>-</p>
+                            </c:when>
+                        </c:choose>
+                    </td>
+                    <td><c:out value="${data.receiverName}"/></td>
                 </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="data" items="${infoList}">
-                    <tr>
-                        <td>
-                            <p><c:out value="${data.logisOrderUid}"/></p>
-                        </td>
-                        <td>
-                            <p><c:out value="${data.requestTime}"/></p>
-                        </td>
-
-                        <td>
-                            <c:choose>
-                                <c:when test="${data.status == 0}">
-                                    <p>접수완료</p>
-                                </c:when>
-
-                                <c:when test="${data.status == 1}">
-                                    <p>결제완료</p>
-                                </c:when>
-
-                                <c:when test="${data.status == 2}">
-                                    <p>결제완료</p>
-                                </c:when>
-
-                                <c:when test="${data.status == 3}">
-                                    <p>상품인수</p>
-                                </c:when>
-
-                                <c:when test="${data.status == 4}">
-                                    <p>배송시작</p>
-                                </c:when>
-
-                                <c:when test="${data.status == 5}">
-                                    <p>배송완료</p>
-                                </c:when>
-                            </c:choose>
-                        </td>
-
-                        <td>
-                            <c:choose>
-                                <c:when test="${not empty data.arriveTime}">
-                                    <p><c:out value="${data.arriveTime}"/></p>
-                                </c:when>
-
-                                <c:when test="${empty data.arriveTime}">
-                                    <p>-</p>
-                                </c:when>
-                            </c:choose>
-                        </td>
-
-                        <td>
-                            <p><c:out value="${data.receiverName}"/></p>
-                        </td>
-                    </tr>
-
-                </c:forEach>
-                </tbody>
-            </table>
-        </div>
+            </c:forEach>
+            </tbody>
+        </table>
     </div>
 </div>
 </body>

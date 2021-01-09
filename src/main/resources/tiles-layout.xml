@@ -87,25 +87,25 @@
 	<!-- <put-attribute name="footer" value="/WEB-INF/template/footer.jsp" /> -->
 	<!-- </definition> -->
 
-	<definition name="taxi/user/*/*/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}/{2}/{3}.jsp" />
-	</definition>
-	<definition name="taxi/user/*/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}/{2}.jsp" />
-	</definition>
-	<definition name="taxi/user/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}.jsp" />
-	</definition>
+<!--	<definition name="taxi/user/*/*/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}/{2}/{3}.jsp" />-->
+<!--	</definition>-->
+<!--	<definition name="taxi/user/*/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}/{2}.jsp" />-->
+<!--	</definition>-->
+<!--	<definition name="taxi/user/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/taxi/user/{1}.jsp" />-->
+<!--	</definition>-->
 
-	<definition name="management/*/*/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/management/{1}/{2}/{3}.jsp" />
-	</definition>
-	<definition name="management/*/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/management/{1}/{2}.jsp" />
-	</definition>
-	<definition name="management/*" extends=".default">
-		<put-attribute name="body" value="/WEB-INF/views/management/{1}.jsp" />
-	</definition>
+<!--	<definition name="management/*/*/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/management/{1}/{2}/{3}.jsp" />-->
+<!--	</definition>-->
+<!--	<definition name="management/*/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/management/{1}/{2}.jsp" />-->
+<!--	</definition>-->
+<!--	<definition name="management/*" extends=".default">-->
+<!--		<put-attribute name="body" value="/WEB-INF/views/management/{1}.jsp" />-->
+<!--	</definition>-->
 	<definition name="main/*" extends=".default">
 		<put-attribute name="body" value="/WEB-INF/views/main/{1}.jsp" />
 	</definition>
