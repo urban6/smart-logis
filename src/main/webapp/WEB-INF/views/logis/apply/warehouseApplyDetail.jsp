@@ -238,7 +238,6 @@
         .section {
             width: 950px;
             margin: 0 auto;
-            height: 93vh;
             display: flex;
         }
 
@@ -351,55 +350,71 @@
     </div>
     <div class="section">
         <div class="div-warehouse-box">
-            <div>
-                <div id="map" style="width: 50%; height: 300px;"></div>
-                <script>
-                    const mapOptions = {
-                        center: new naver.maps.LatLng(${info.lat}, ${info.lng}),
-                        zoom: 16
-                    };
+            <c:if test="${info.warehouseUid eq '1'}">
+                <img src="/images/whse1.png" width="700">
+            </c:if>
+            <c:if test="${info.warehouseUid eq '2'}">
+                <img src="/images/whse2.png" width="700">
+            </c:if>
+            <c:if test="${info.warehouseUid eq '3'}">
+                <img src="/images/whse3.png" width="700">
+            </c:if>
+            <c:if test="${info.warehouseUid eq '4'}">
+                <img src="/images/whse4.png" width="700">
+            </c:if>
 
-                    const map = new naver.maps.Map('map', mapOptions);
+            <%--            <div>--%>
+            <%--                <div id="map" style="width: 50%; height: 300px;"></div>--%>
+            <%--                <script>--%>
+            <%--                    const mapOptions = {--%>
+            <%--                        center: new naver.maps.LatLng(${info.lat}, ${info.lng}),--%>
+            <%--                        zoom: 16--%>
+            <%--                    };--%>
 
-                    const marker = new naver.maps.Marker({
-                        position: new naver.maps.LatLng(${info.lat}, ${info.lng}),
-                        map: map
-                    });
-                    var infoWindow = new naver.maps.InfoWindow({
-                        //anchorSkew: true
-                        borderWidth: 0,
-                        disableAnchor: true,
-                        backgroundColor: 'transparent'
-                    });
-                    infoWindow.setContent([
-                        '<div style="padding:0px;min-width:35px;line-height:150% max-height:30px;">',
-                        '<div class="btn btn-primary btn-sm text-center mb-2" id="locationConfirm">' + "${info.warehouseName}" + '</div>',
-                        '</div>'
-                    ].join('\n'));
-                    infoWindow.open(map, marker);
+            <%--                    const map = new naver.maps.Map('map', mapOptions);--%>
 
-                </script>
-            </div>
+            <%--                    const marker = new naver.maps.Marker({--%>
+            <%--                        position: new naver.maps.LatLng(${info.lat}, ${info.lng}),--%>
+            <%--                        map: map--%>
+            <%--                    });--%>
+            <%--                    var infoWindow = new naver.maps.InfoWindow({--%>
+            <%--                        //anchorSkew: true--%>
+            <%--                        borderWidth: 0,--%>
+            <%--                        disableAnchor: true,--%>
+            <%--                        backgroundColor: 'transparent'--%>
+            <%--                    });--%>
+            <%--                    infoWindow.setContent([--%>
+            <%--                        '<div style="padding:0px;min-width:35px;line-height:150% max-height:30px;">',--%>
+            <%--                        '<div class="btn btn-primary btn-sm text-center mb-2" id="locationConfirm">' + "${info.warehouseName}" + '</div>',--%>
+            <%--                        '</div>'--%>
+            <%--                    ].join('\n'));--%>
+            <%--                    infoWindow.open(map, marker);--%>
+
+            <%--                </script>--%>
+            <%--            </div>--%>
         </div>
 
         <div class="col-md-4" style="background: #f5f5f5;">
             <div class="div-time-box">
-                <span class="span-time-title">대여 시작일</span>
-                <span class="span-time"><i class="far fa-clock mr-2" style="font-size: 1.2rem; color: #8b62ff;"></i>${info.startDatetime}</span>
+                <span class="span-time-title">대여시작</span>
+                <span class="span-time"><i class="far fa-clock mr-2"
+                                           style="font-size: 1.2rem; color: #8b62ff;"></i>${info.startDatetime}</span>
             </div>
             <div class="div-time-box">
-                <span class="span-time-title">대여 종료일</span>
-                <span class="span-time"><i class="far fa-clock mr-2" style="font-size: 1.2rem; color: #8b62ff;"></i>${info.endDatetime}</span>
+                <span class="span-time-title">대여종료</span>
+                <span class="span-time"><i class="far fa-clock mr-2"
+                                           style="font-size: 1.2rem; color: #8b62ff;"></i>${info.endDatetime}</span>
             </div>
             <div class="div-time-box">
                 <span class="span-time-title">신청수량</span>
-                <span class="span-time"><i class="fas fa-tag mr-2" style="color: #8b62ff; font-size: 1.2rem"></i>${info.price}원  &times; ${info.spaceSize}개 &times; ${info.days}일</span>
+                <span class="span-time"><i class="fas fa-tag mr-2"
+                                           style="color: #8b62ff; font-size: 1.2rem"></i>${info.price}원  &times; ${info.spaceSize}개 &times; ${info.days}일</span>
             </div>
-            <div class="div-time-box">
-                <span class="span-time-title">특이사항</span>
-                <span class="span-time"><i class="fas fa-check mr-2" style="color: #8b62ff; font-size: 0.9rem"></i>높이 2.5m</span>
-                <span class="span-time"><i class="fas fa-check mr-2" style="color: #8b62ff; font-size: 0.9rem"></i>방범 완비</span>
-            </div>
+<%--            <div class="div-time-box">--%>
+<%--                <span class="span-time-title">특이사항</span>--%>
+<%--                <span class="span-time"><i class="fas fa-check mr-2" style="color: #8b62ff; font-size: 0.9rem"></i>높이 2.5m</span>--%>
+<%--                <span class="span-time"><i class="fas fa-check mr-2" style="color: #8b62ff; font-size: 0.9rem"></i>방범 완비</span>--%>
+<%--            </div>--%>
 
             <div class="div-pay-box">
                 <input id="btnPay" type="button" class="btn btn-pay" value="간편결제"/>

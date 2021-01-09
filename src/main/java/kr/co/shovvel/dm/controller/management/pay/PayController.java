@@ -56,30 +56,30 @@ public class PayController {
     boolean isMobile = false;
 
     //가맹점 DB 아이디 real 환경
-    
+
     public int sellerUid = 2;
     public String sellerKey = "F1S8YJ";
     PaycoUtil util = new PaycoUtil("REAL"); // CommonUtil
-    
-    
+
+
     //개발 환경
     /*
     public int sellerUid = 1;
     public String sellerKey = "S0FSJE";
     PaycoUtil util = new PaycoUtil("DEV"); // CommonUtil
     */
-    
-    
- // 취소, 환불, 영수증을 위한 데이터 가져오기
- 		@RequestMapping(value = "getApproval")
- 		public void getApproval(HttpServletRequest request, Model model) {
 
- 			String userUid = "1";
- 			SellerApprovalVO approvalInfo = payService.getArrovalDetail(userUid);
- 			
- 			model.addAttribute("approvalInfo", approvalInfo);
- 			
- 		}
+
+    // 취소, 환불, 영수증을 위한 데이터 가져오기
+    @RequestMapping(value = "getApproval")
+    public void getApproval(HttpServletRequest request, Model model) {
+
+        String userUid = "1";
+        SellerApprovalVO approvalInfo = payService.getArrovalDetail(userUid);
+
+        model.addAttribute("approvalInfo", approvalInfo);
+
+    }
 
     @RequestMapping(value = "payco_return_test")
     public String payco_return_test(HttpServletRequest request, Model model) throws JsonProcessingException, IOException {
@@ -131,7 +131,7 @@ public class PayController {
         String message = request.getParameter("message"); // 결과 메시지
         String cacelResulCode = "";
         String cacelResultMsg = "";
-        String approvalCode ="";
+        String approvalCode = "";
 
         /* 주문예약시 전달한 returnUrlParam */
         String taxationType = request.getParameter("taxationType");
@@ -140,13 +140,13 @@ public class PayController {
         int vatAmt = (int) Float.parseFloat(request.getParameter("totalVatAmt").toString());
         System.out.println("taxationType : " + taxationType);
 
-       
-		
-        
-        
+
+
+
+
         /* 결제 인증 성공시 */
         if (code.equals("0")) {
-        	payService.updateOrderCode(code, userUid);		//productorder에 결제 코드 저장 성공 : 0
+            payService.updateOrderCode(code, userUid);        //productorder에 결제 코드 저장 성공 : 0
             /*
              * 수신된 데이터 중 필요한 정보를 추출하여 총 결제금액과 요청금액이 일치하는지 확인하고, 결제요청 상품의 재고파악을 실행하여 PAYCO 결제
              * 승인 API 호출 여부를 판단한다.
@@ -251,7 +251,6 @@ public class PayController {
                         for (int i = 0; i < orderProducts_arr.size(); i++) {
                             String orderProductKey = orderProducts_arr.get(i).get("sellerOrderProductReferenceKey").textValue();
                             sellerOrderProductReferenceKey.add(i, orderProductKey);
-
                         }
 
 
@@ -359,12 +358,12 @@ public class PayController {
         logger.debug("cacelResultMsg: " + cacelResultMsg);
 
         payService.updateApprovalCode(approvalCode, sellerOrderReferenceKey);
-        
+
         model.addAttribute("returnUrl", returnUrl);
         model.addAttribute("message", message);
         model.addAttribute("cacelResultMsg", cacelResultMsg);
 
-        return "logis/complete" + returnUrl+"_test";
+        return "logis/complete" + returnUrl + "_test";
 //		return domainName + returnUrl;
     }
 
@@ -418,7 +417,7 @@ public class PayController {
         String message = request.getParameter("message"); // 결과 메시지
         String cacelResulCode = "";
         String cacelResultMsg = "";
-        String approvalCode ="";
+        String approvalCode = "";
 
         /* 주문예약시 전달한 returnUrlParam */
         String taxationType = request.getParameter("taxationType");
@@ -427,13 +426,13 @@ public class PayController {
         int vatAmt = (int) Float.parseFloat(request.getParameter("totalVatAmt").toString());
         System.out.println("taxationType : " + taxationType);
 
-       
-		
-        
-        
+
+
+
+
         /* 결제 인증 성공시 */
         if (code.equals("0")) {
-        	payService.updateOrderCode(code, userUid);		//productorder에 결제 코드 저장 성공 : 0
+            payService.updateOrderCode(code, userUid);        //productorder에 결제 코드 저장 성공 : 0
             /*
              * 수신된 데이터 중 필요한 정보를 추출하여 총 결제금액과 요청금액이 일치하는지 확인하고, 결제요청 상품의 재고파악을 실행하여 PAYCO 결제
              * 승인 API 호출 여부를 판단한다.
@@ -646,7 +645,7 @@ public class PayController {
         logger.debug("cacelResultMsg: " + cacelResultMsg);
 
         payService.updateApprovalCode(approvalCode, sellerOrderReferenceKey);
-        
+
         model.addAttribute("returnUrl", returnUrl);
         model.addAttribute("message", message);
         model.addAttribute("cacelResultMsg", cacelResultMsg);
@@ -948,15 +947,15 @@ public class PayController {
         Map<String, Object> map = new HashMap<String, Object>();
         map = stringToJSON(strResult);
 
-        
-        int cancelOk =(int)map.get("code");
-		logger.debug("cancelOk:   "+cancelOk);
-		
-		  if(cancelOk==0){ 
-			  logger.debug("cancelOk:   "+cancelOk);
-			  payService.updateCancel(orderNo,totalCancelPossibleAmt, cancelTotalAmt, requestMemo); 
-		  }
-		  
+
+        int cancelOk = (int) map.get("code");
+        logger.debug("cancelOk:   " + cancelOk);
+
+        if (cancelOk == 0) {
+            logger.debug("cancelOk:   " + cancelOk);
+            payService.updateCancel(orderNo, totalCancelPossibleAmt, cancelTotalAmt, requestMemo);
+        }
+
         model.addAttribute(map);
 
 
@@ -1087,14 +1086,14 @@ public class PayController {
 
         return domainName + "/index";
     }
-    
+
     @RequestMapping(value = "payco_reserve_test")
     // public void opnePaycoReserve(@RequestParam Map<String, Object> param, HttpServletRequest request, Model model) {
     public void payco_reserve_test(@RequestParam String[] productKey,
-                                 @RequestParam String[] orderQuantity,
-                                 @RequestParam String customerOrderNumber, HttpServletRequest request, Model model) {
+                                   @RequestParam String[] orderQuantity,
+                                   @RequestParam String customerOrderNumber, HttpServletRequest request, Model model) {
         // logger.debug("Payco Reseve KeySet = " + param.keySet());
-         
+
         SellerInfoVO seller = payService.getSellerInfo(sellerUid); // 가맹점 정보 가져오기
 
         ObjectMapper mapper = new ObjectMapper(); // jackson json object
@@ -1235,7 +1234,9 @@ public class PayController {
     public void opnePaycoReserve(@RequestParam String[] productKey,
                                  @RequestParam String[] orderQuantity,
                                  @RequestParam String customerOrderNumber, HttpServletRequest request, Model model) {
+
         // logger.debug("Payco Reseve KeySet = " + param.keySet());
+        logger.debug("productKey = " + productKey);
 
         SellerInfoVO seller = payService.getSellerInfo(sellerUid); // 가맹점 정보 가져오기
 
@@ -1342,7 +1343,7 @@ public class PayController {
         // 2순위 : 주문예약시 전달받은 returnUrl 이동 + 실패코드(오류코드:2222)
         // 3순위 : 가맹점 URL로 이동(가맹점등록시 받은 사이트URL)
         // 4순위 : 이전 페이지로 이동 => history.Back();
-        extraData.put("cancelMobileUrl", "http://sharelogi.smartgimhae.kr"); // [선택][모바일 일경우 필수]모바일 결제페이지에서 취소 버튼 클릭시 이동할 URL
+        extraData.put("cancelMobileUrl", "http://logi.smartgimhae.kr"); // [선택][모바일 일경우 필수]모바일 결제페이지에서 취소 버튼 클릭시 이동할 URL
 
         Map<String, Object> viewOptions = new HashMap<String, Object>();
         viewOptions.put("showMobileTopGnbYn", "N"); // [선택]모바일 상단 GNB 노출여부

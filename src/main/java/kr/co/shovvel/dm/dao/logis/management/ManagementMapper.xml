@@ -77,6 +77,20 @@
         WHERE LOGIS_ORDER_UID = #{logisOrderUid};
     </update>
 
+    <!-- 택배 출발 시간을 업데이트한다. -->
+    <update id="updateLogisStartTime" parameterType="string">
+        UPDATE logis_order_info
+        SET START_TIME = NOW()
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </update>
+
+    <!-- 택배 도착 시간을 업데이트한다. -->
+    <update id="updateLogisArriveTime" parameterType="string">
+        UPDATE logis_order_info
+        SET ARRIVE_TIME = NOW()
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </update>
+
     <!-- 기사가 물건을 추가할 때, 사용한다. -->
     <insert id="addItemUsingLogis" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem"
             useGeneratedKeys="true" keyProperty="itemUid">

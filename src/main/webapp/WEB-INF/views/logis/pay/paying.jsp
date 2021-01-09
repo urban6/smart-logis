@@ -92,8 +92,8 @@
             // const orderQuantity = parseInt(${quantity}); // 상품 갯수
 
             let productKey = [];
-            productKey.push("${boxSellerKey}");
-            productKey.push("${paletteSellerKey}");
+            productKey.push("5");
+            productKey.push("6");
 
             let orderQuantity = [];
             orderQuantity.push("${boxCount}");

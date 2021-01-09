@@ -247,7 +247,7 @@ public abstract class Consts {
 	}
 
 	public static final class LOGIS_PRICE_KEY {
-		public static final int BOX = 3;
-		public static final int PALETTE = 4;
+		public static final int BOX = 5;
+		public static final int PALETTE = 6;
 	}
 }
