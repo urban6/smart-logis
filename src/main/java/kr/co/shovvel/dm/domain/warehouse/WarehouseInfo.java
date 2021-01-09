@@ -2,12 +2,9 @@ package kr.co.shovvel.dm.domain.warehouse;
 
 import lombok.Data;
 
-/**
- * http://localhost:8080/user/warehouse/apply 에서 창고를 조회한 결과를 보내줄 때 사용한다.
- */
-@Data
 public class WarehouseInfo {
 
+	private String orderInfoUid;
     private String warehouseUid; // 창고 고유번호
     private String warehouseName; // 창고 명
     private String warehouseAddress; // 창고 주소
@@ -27,6 +24,14 @@ public class WarehouseInfo {
     private String endDatetime;
 
     private boolean isCanUse;
+
+	public String getOrderInfoUid() {
+		return orderInfoUid;
+	}
+
+	public void setOrderInfoUid(String orderInfoUid) {
+		this.orderInfoUid = orderInfoUid;
+	}
 
 	public String getWarehouseUid() {
 		return warehouseUid;
@@ -128,9 +133,7 @@ public class WarehouseInfo {
 		return isCanUse;
 	}
 
-	public void setCanUse(boolean isCanUse) {
-		this.isCanUse = isCanUse;
+	public void setCanUse(boolean canUse) {
+		isCanUse = canUse;
 	}
-    
-    
 }

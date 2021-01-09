@@ -38,6 +38,11 @@
                 movePage("POST", "/user/logis/apply");
             });
 
+            // 물류 배송신청
+            $("#logisNormalApply").click(function (key) {
+                movePage("POST", "/user/logis/normalApply");
+            });
+
             // 물류 배송조회
             $("#logisSearch").click(function (key) {
                 movePage("POST", "/user/logis/search");
@@ -72,30 +77,36 @@
                 <h2>빌리시는 분</h2><br>
                 <div class="menu_cell_50">
                     <div id="warehouseApply" class="icon_a"><img src="/img/icon_02.png" alt=""></div>
-                    <br>창고대여
+                    <br>창고 대여
                 </div>
                 <div class="menu_cell_50">
                     <div id="warehouseSearch" class="icon_a"><img src="/img/icon_04.png" alt=""></div>
-                    <br>내가빌린 창고 조회
+                    <br>창고 입고 현황
                 </div>
             </div>
             <div class="menu_cell bg_tr">
                 <h2>공유하시는 분</h2><br>
                 <div class="menu_cell_50">
                     <div id="warehouseLend" class="icon_a"><img src="/img/icon_01.png" alt=""></div>
-                    <br>창고등록
+                    <br>창고 등록
                 </div>
                 <div class="menu_cell_50">
                     <div id="rentWarehouseSearch" class="icon_a"><img src="/img/icon_03.png" alt=""></div>
-                    <br>내가빌려준 창고 조회
+                    <br>창고 임대 현황
                 </div>
             </div>
         </div>
         <div class="menu_50">
             <div class="menu_cell bg_tr">
-                <br>
-                <div id="logisApply" class="icon_a_2"><img src="/img/icon_05.png" alt=""></div>
-                <h2>물류 배송신청</h2>
+                <h2> </h2><br>
+                <div class="menu_cell_50">
+                    <div id="logisApply" class="icon_a"><img src="/img/icon_05.png" alt=""></div>
+                    <br>창고 입고신청
+                </div>
+                <div class="menu_cell_50">
+                    <div id="logisNormalApply" class="icon_a"><img src="/img/icon_05.png" alt=""></div>
+                    <br>일반 배송신청
+                </div>
             </div>
             <div class="menu_cell bg_tr">
                 <br>

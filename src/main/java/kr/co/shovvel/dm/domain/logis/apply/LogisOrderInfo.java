@@ -12,13 +12,47 @@ import java.util.List;
 /**
  * 택배를 신청할 때, 필요한 데이터
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class LogisOrderInfo {
 
-    public String getLogisOrderUid() {
+	private String logisOrderUid;
+    private String userUid;
+
+    // 보내는 분 정보
+    private String senderName;
+    private String senderPhone;
+    private String senderPostcode;
+    private String senderAddress;
+
+    // 받는 분 정보
+    private String receiverName;
+    private String receiverPhone;
+    private String receiverPostcode;
+    private String receiverAddress;
+
+    private String wishDeliveryDatetime;
+    private String startTime;
+    private String endTime;
+
+    private int boxCount;
+    private int paletteCount;
+    private String requestTime;
+
+    private int status;
+
+    private int price; // 가격
+
+    private String isPay;
+    private String payType;
+    private int logisType;
+
+    private String itemInfo;
+
+    private List<RFIDItem> rfidItemList;
+
+    private String warehouseOrderUid;
+
+	public String getLogisOrderUid() {
 		return logisOrderUid;
 	}
 
@@ -202,40 +236,11 @@ public class LogisOrderInfo {
 		this.rfidItemList = rfidItemList;
 	}
 
-	private String logisOrderUid;
-    private String userUid;
+	public String getWarehouseOrderUid() {
+		return warehouseOrderUid;
+	}
 
-    // 보내는 분 정보
-    private String senderName;
-    private String senderPhone;
-    private String senderPostcode;
-    private String senderAddress;
-
-    // 받는 분 정보
-    private String receiverName;
-    private String receiverPhone;
-    private String receiverPostcode;
-    private String receiverAddress;
-
-    private String wishDeliveryDatetime;
-    private String startTime;
-    private String endTime;
-
-    private int boxCount;
-    private int paletteCount;
-    private String requestTime;
-
-    private int status;
-
-    private int price; // 가격
-
-    private String isPay;
-    private String payType;
-    private int logisType;
-
-    private String itemInfo;
-
-    private List<RFIDItem> rfidItemList;
-    
-    
+	public void setWarehouseOrderUid(String warehouseOrderUid) {
+		this.warehouseOrderUid = warehouseOrderUid;
+	}
 }

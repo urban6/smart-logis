@@ -219,7 +219,7 @@
                         <span class="form-value"><c:out value="${info.price}"/>원</span>
                     </td>
                     <td class="div-lightgray">
-                        <strong class="form-title">배달결과</strong>
+                        <strong class="form-title">상태</strong>
                     </td>
                     <td>
                         <strong class="form-value">
