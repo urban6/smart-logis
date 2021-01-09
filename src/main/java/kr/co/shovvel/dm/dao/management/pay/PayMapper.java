@@ -46,4 +46,6 @@ public interface PayMapper {
 		void updateApprovalCode(@Param("approvalCode")String approvalCode, @Param("sellerOrderReferenceKey")String sellerOrderReferenceKey );
 		
 		SellerApprovalVO getArrovalDetail(String userUid);
+		
+		SellerApprovalVO getArroval(String orderInfoUid);
 }

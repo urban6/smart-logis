@@ -184,5 +184,25 @@
 			
 	</select>
 
+	<select id="getArroval" parameterType="String" resultType="kr.co.shovvel.dm.domain.management.pay.SellerApprovalVO">
+		SELECT 
+			ORDERNO,
+			ORDERCERTIFYKEY,
+			TOTALPAYMENTAMT,
+			RESERVEORDERNO,
+			SELLERORDERREFERENCEKEY,
+			TRADEYMDT,
+			USER_UID,
+			APPROVAL_CODE,
+			APPROVAL_START_TIME,
+			TOTALCANCELPOSSIBLEAMT
+		FROM seller_approval
+		WHERE 
+			SELLERORDERREFERENCEKEY = (SELECT 
+											SELLERORDERREFERENCEKEY 
+										FROM warehouse_order_info woi
+										WHERE 
+											woi.ORDER_INFO_UID = #{orderInfoUid})
+	</select>
 </mapper>
 

@@ -73,9 +73,8 @@ public class PayController {
  // 취소, 환불, 영수증을 위한 데이터 가져오기
  		@RequestMapping(value = "getApproval")
  		public void getApproval(HttpServletRequest request, Model model) {
-
- 			String userUid = "1";
- 			SellerApprovalVO approvalInfo = payService.getArrovalDetail(userUid);
+ 			String orderInfoUid = request.getParameter("orderInfoUid");
+ 			SellerApprovalVO approvalInfo = payService.getArroval(orderInfoUid);
  			
  			model.addAttribute("approvalInfo", approvalInfo);
  			

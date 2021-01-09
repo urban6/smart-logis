@@ -185,4 +185,8 @@ public class PayService {
 	public SellerApprovalVO getArrovalDetail(String userUid) {
 		return payMapper.getArrovalDetail(userUid);
 	}
+	
+	public SellerApprovalVO getArroval(String orderInfoUid) {
+		return payMapper.getArroval(orderInfoUid);
+	}
 }
