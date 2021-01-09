@@ -60,13 +60,8 @@
         }
     </script>
     <style>
-        @font-face {
-            font-family: 'gimhae-font-regular';
-            src: url('../../../../fonts/GimhaeGayaR.ttf');
-        }
-
         body {
-            font-family: 'gimhae-font-regular', serif !important;
+
         }
 
         #wrap {

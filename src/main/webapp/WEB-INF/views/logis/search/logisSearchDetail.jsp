@@ -209,7 +209,7 @@
                 </tr>
                 <tr>
                     <td class="div-lightgray" colspan="1"><strong class="form-title">받는분 주소</strong></td>
-                    <td colspan="3"><strong class="form-value"><c:out value="${info.senderAddress}"/></strong></td>
+                    <td colspan="3"><strong class="form-value"><c:out value="${info.receiverAddress}"/></strong></td>
                 </tr>
                 <tr>
                     <td class="div-lightgray">
@@ -233,7 +233,7 @@
                                 </c:when>
 
                                 <c:when test="${info.status == 2}">
-                                    <p>결제완료</p>
+                                    <p>담당자 배정완료</p>
                                 </c:when>
 
                                 <c:when test="${info.status == 3}">

@@ -236,7 +236,7 @@
                         '</address>' +
                         '</div>' +
                         '<div class="price">' +
-                        '<div><span class="span-space-count">남은수량: ' + list[i].availableSpace + '</span></div>' +
+                        '<div><span class="span-space-count">대여 가능 공간: ' + list[i].availableSpace + '</span></div>' +
                         '<div><span class="span-price">' + numberWithCommas(list[i].price) + '원 / 일</span></div>' +
                         '<div class="emphasisPrice">' + numberWithCommas(totalPrice) + '원</div>' +
                         '<input type="button" class="btn btn-select" value="선택"/>' +
@@ -251,7 +251,7 @@
                         '</address>' +
                         '</div>' +
                         '<div class="price">' +
-                        '<div><span class="span-no-space-count">남은수량: 0</span></div>' +
+                        '<div><span class="span-no-space-count">대여 가능 공간: 0</span></div>' +
                         '<div><span class="span-price">' + numberWithCommas(list[i].price) + '원 / 일</span></div>' +
                         '<div class="unusableEmphasisPrice">' + numberWithCommas(totalPrice) + '원</div>' +
                         '<input type="button" class="btn btn-cant-select" value="선택" disabled/>' +
@@ -338,7 +338,7 @@
                     '</address>' +
                     '</div>' +
                     '<div class="price">' +
-                    '<div><span class="span-space-count">남은수량: ' + res[i].availableSpace + '</span></div>' +
+                    '<div><span class="span-space-count">대여 가능 공간: ' + res[i].availableSpace + '</span></div>' +
                     '<div><span class="span-price">' + numberWithCommas(res[i].price) + '원 / 일</span></div>' +
                     '<div class="emphasisPrice">' + numberWithCommas(totalPrice) + '원</div>' +
                     '<input type="button" class="btn btn-select" value="선택"/>' +
@@ -353,7 +353,7 @@
                     '</address>' +
                     '</div>' +
                     '<div class="price">' +
-                    '<div><span class="span-no-space-count">남은수량: 0</span></div>' +
+                    '<div><span class="span-no-space-count">대여 가능 공간: 0</span></div>' +
                     '<div><span class="span-price">' + numberWithCommas(res[i].price) + '원 / 일</span></div>' +
                     '<div class="unusableEmphasisPrice">' + numberWithCommas(totalPrice) + '원</div>' +
                     '<input type="button" class="btn btn-cant-select" value="선택" disabled/>' +
@@ -571,12 +571,13 @@
     }
 
     .map-container {
-        width: 100%;
+        width: 950px;
         background-color: #39539c;
+        margin: 0 auto;
     }
 
     .map {
-        width: 950px;
+        width: 100%;
         height: 400px;
         margin: 0 auto;
     }

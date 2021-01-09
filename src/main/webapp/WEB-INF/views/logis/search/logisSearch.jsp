@@ -156,6 +156,7 @@
 <div class="header">
     <span class="header-title">물류 배송 신청 목록</span>
 </div>
+
 <div id="wrap">
     <div class="section">
         <table id="list" class="table table-hover">
@@ -191,7 +192,7 @@
                             </c:when>
 
                             <c:when test="${data.status == 2}">
-                                결제완료
+                                담당자 배정완료
                             </c:when>
 
                             <c:when test="${data.status == 3}">

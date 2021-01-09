@@ -219,8 +219,8 @@ public class LogisController {
         mav.addObject("boxCount", boxCount);
         mav.addObject("paletteCount", paletteCount);
 
-        mav.addObject("boxSellerKey", boxSellerKey);
-        mav.addObject("paletteSellerKey", paletteSellerKey);
+        mav.addObject("boxSellerKey", Consts.LOGIS_PRICE_KEY.BOX);
+        mav.addObject("paletteSellerKey", Consts.LOGIS_PRICE_KEY.PALETTE);
 
         mav.setViewName("logis/pay/paying");
         return mav;

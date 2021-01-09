@@ -154,7 +154,16 @@ public class ManagementService {
      * @param status        - 상태 0:접수완료, 1:상품인수 출발, 2:상품인수, 3:배달출발, 4:배달완료
      */
     public void updateLogisStatus(String logisOrderUid, int status) {
+
         managementMapper.updateLogisStatus(logisOrderUid, status);
+
+        // 배달출발 상태는 출발시간을 변경
+        if (status == 4) {
+            managementMapper.updateLogisStartTime(logisOrderUid);
+        } else if (status == 5) {
+            // 배달완료 상태는 도착시간을 변경
+            managementMapper.updateLogisArriveTime(logisOrderUid);
+        }
     }
 
     /**

@@ -20,6 +20,10 @@
     <script type="text/javascript" src="<c:url value='/js/core.min.js'/>"></script>
     <script type="text/javascript" src="<c:url value='/js/sha256.min.js'/>"></script>
 
+    <%-- Bootstrap 5.0.0 --%>
+    <script src="<c:url value ='/assets/libs/bootstrap-5.0.0/js/bootstrap.min.js'/>"></script>
+    <link rel="stylesheet" href="<c:url value='/assets/libs/bootstrap-5.0.0/css/bootstrap.min.css'/>">
+
     <c:set var="SUCCESS"><%=Consts.LOGIN_RESULT.SUCCESS%>
     </c:set>
     <c:set var="FAIL_ACCOUNT"><%=Consts.LOGIN_RESULT.FAIL_ACCOUNT%>
@@ -58,6 +62,7 @@
 
             const sha256Password = CryptoJS.SHA256($("#password").val()).toString();
 
+            $('#loginSpnnier').css('display', 'inline-block');
             $.ajax({
                 url: '/user/login/loginAction',
                 type: 'POST',
@@ -67,6 +72,8 @@
                 },
                 dataType: 'json',
                 success: function (data) {
+                    $('#loginSpnnier').css('display', 'none');
+
                     if (data.result == "${SUCCESS}") {
                         movePage("POST", "/user/home/home");
                     } else if (data.result == "${FAIL_PARAM}") {
@@ -74,6 +81,8 @@
                     }
                 },
                 error: function (data) {
+                    $('#loginSpnnier').css('display', 'none');
+                    alert("잠시 후 다시 시도해 주세요.");
                 }
             });
         }
@@ -112,7 +121,12 @@
         <input id="id" type="text" placeholder="ID"><br>
         <input id="password" type="password" placeholder="Password" autocomplete="off"><br>
     </form>
-    <div id="btnLogin" class="login">로그인</div>
+    <div id="btnLogin" class="login">
+        <div id="loginSpnnier" class="spinner-border" style="width: 3rem; height: 3rem; display: none;" role="status" >
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        로그인
+    </div>
     <br>
     <a href="#">이용안내</a><a href="/user/signUp/signUp">회원가입</a>
 </div>

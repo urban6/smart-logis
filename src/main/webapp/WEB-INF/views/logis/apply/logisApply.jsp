@@ -614,7 +614,7 @@
         .header {
             height: 7vh;
             width: 100%;
-            background: url('/images/BG_3.png');
+            background: url('/images/bg_header.png');
             display: table;
             align-content: center;
             justify-content: center;

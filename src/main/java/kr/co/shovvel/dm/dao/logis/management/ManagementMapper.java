@@ -34,6 +34,10 @@ public interface ManagementMapper {
 
     void updateLogisStatus(@Param(value = "logisOrderUid") String logisOrderUid, @Param(value = "status") int status);
 
+    void updateLogisStartTime(@Param(value = "logisOrderUid") String logisOrderUid);
+
+    void updateLogisArriveTime(@Param(value = "logisOrderUid") String logisOrderUid);
+
     void addItemUsingLogis(WarehouseItem warehouseItem);
 
     void insertRfidByDriver(RFID rfid);
