@@ -14,38 +14,40 @@ import kr.co.shovvel.dm.domain.management.pay.SellerProductOrderVO;
 
 @Component
 public interface PayMapper {
-	
-		SellerInfoVO getSellerInfo(int sellerUid);
-		
-		ArrayList<SellerProductInfoVO> getProductInfo(String cpId);
-		
-		Map<String, Object> getProductInfo_Selected(String productUid);
-		
-		int setUserOrder(SellerProductOrderVO userOrder);
-		
-		Map<String, Object> getOrderInfo(String sellerKey);
-		
-		ArrayList<Map<String, Object>> getOrderTotalPrice(String sellerOrderReferenceKey);
-		
-		int updateUserOrder(SellerProductOrderVO userOrder);
-		
-		int setOrderApproval(SellerApprovalVO orderApproval);
-		
-		int setOrder(SellerApprovalVO orderApproval);
-		
-		Map<String, Object> getOrderProductPrice(@Param("orderNo")String orderNo, @Param("sellerOrderProductReferenceKey")String sellerOrderProductReferenceKey );
-		
-		int updateCancel(SellerApprovalVO orderApproval);
 
-		String searchSellerKey(@Param(value = "productUid") int productUid);
+    SellerInfoVO getSellerInfo(int sellerUid);
 
-		int searchLogisPrice(@Param(value = "productUid") int productUid);
-		
-		void updateOrderCode(@Param("code")String code, @Param("userUid")String userUid );
-		
-		void updateApprovalCode(@Param("approvalCode")String approvalCode, @Param("sellerOrderReferenceKey")String sellerOrderReferenceKey );
-		
-		SellerApprovalVO getArrovalDetail(String userUid);
-		
-		SellerApprovalVO getArroval(String orderInfoUid);
+    ArrayList<SellerProductInfoVO> getProductInfo(String cpId);
+
+    Map<String, Object> getProductInfo_Selected(String productUid);
+
+    int setUserOrder(SellerProductOrderVO userOrder);
+
+    Map<String, Object> getOrderInfo(String sellerKey);
+
+    ArrayList<Map<String, Object>> getOrderTotalPrice(String sellerOrderReferenceKey);
+
+    int updateUserOrder(SellerProductOrderVO userOrder);
+
+    int setOrderApproval(SellerApprovalVO orderApproval);
+
+    int setOrder(SellerApprovalVO orderApproval);
+
+    Map<String, Object> getOrderProductPrice(@Param("orderNo") String orderNo, @Param("sellerOrderProductReferenceKey") String sellerOrderProductReferenceKey);
+
+    int updateCancel(SellerApprovalVO orderApproval);
+
+    String searchSellerKey(@Param(value = "productUid") int productUid);
+
+    int searchLogisPrice(@Param(value = "productUid") int productUid);
+
+    void updateOrderCode(@Param("code") String code, @Param("userUid") String userUid);
+
+    void updateApprovalCode(@Param("approvalCode") String approvalCode, @Param("sellerOrderReferenceKey") String sellerOrderReferenceKey);
+
+    SellerApprovalVO getArrovalDetail(String userUid);
+
+    SellerApprovalVO getArroval(String orderInfoUid);
+
+    SellerApprovalVO getArrovalLogis(String logisOrderUid);
 }

@@ -94,5 +94,4 @@ public class LoginService {
             return Consts.LOGIN_RESULT.FAIL_PARAM;
         }
     }
-
 }

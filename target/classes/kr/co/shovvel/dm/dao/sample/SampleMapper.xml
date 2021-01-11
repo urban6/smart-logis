@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.sample.SampleMapper" >
+
+	<select id="selectSampleCount" resultType="int">
+		SELECT 	
+			COUNT(1)
+		FROM COM_SAMPLE 
+		WHERE 1=1
+		AND	COM_SAMPLE.USE_YN = 'Y'
+		<if test="condition.search_sample_type != null and condition.search_sample_type != ''" >
+			AND COM_SAMPLE.SAMPLE_TYPE = #{condition.search_sample_type}
+		</if>
+		<if test="condition.search_sample_name != null and condition.search_sample_name != ''" >
+			AND COM_SAMPLE.SAMPLE_NAME LIKE '%${condition.search_sample_name}%'
+		</if>
+		<if test="condition.language_cd != null and condition.language_cd != ''" >
+			AND COM_SAMPLE.LANGUAGE_CD = #{condition.language_cd}
+		</if>
+	</select>
+	
+	<select id="selectSampleList" resultType="kr.co.shovvel.dm.domain.sample.SampleDomain">
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_header" />
+			SELECT 	
+				COM_SAMPLE.SAMPLE_ID,
+				COM_SAMPLE.SAMPLE_NAME,
+				COM_SAMPLE.SAMPLE_TYPE,
+				(
+					SELECT CD_NM FROM COM_CD_MAP WHERE COM_CD = COM_SAMPLE.SAMPLE_TYPE AND COM_CD_MAP.LANGUAGE_CLCD = #{condition.language_cd}
+				) AS SAMPLE_TYPE_NAME,
+				DATE_FORMAT(CONVERT_TZ(COM_SAMPLE.REG_DATETIME, '+00:00', #{condition.zoneOffset}), '%Y-%m-%d %H:%i:%s') AS REG_DATETIME
+			FROM COM_SAMPLE 
+			WHERE 1=1
+			AND	COM_SAMPLE.USE_YN = 'Y'
+			<if test="condition.search_sample_type != null and condition.search_sample_type != ''" >
+				AND COM_SAMPLE.SAMPLE_TYPE = #{condition.search_sample_type}
+			</if>
+			<if test="condition.search_sample_name != null and condition.search_sample_name != ''" >
+				AND COM_SAMPLE.SAMPLE_NAME LIKE '%${condition.search_sample_name}%'
+			</if>
+			<if test="condition.language_cd != null and condition.language_cd != ''" >
+				AND COM_SAMPLE.LANGUAGE_CD = #{condition.language_cd}
+			</if>
+			ORDER BY COM_SAMPLE.SAMPLE_ID DESC
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_footer" />
+	</select>
+
+	<select id="selectSampleNameCount" resultType="int">
+		SELECT 
+		 	COUNT(*)
+		FROM COM_SAMPLE
+		WHERE 1=1
+		AND	COM_SAMPLE.USE_YN = 'Y'
+		AND SAMPLE_NAME = #{sample_name}
+		<if test="sample_id != null and sample_id != ''" >
+			AND COM_SAMPLE.SAMPLE_ID != #{sample_id}
+		</if>
+	</select> 
+	
+	<insert id="insertSample">
+		<selectKey keyProperty="sample_id" resultType="String" order="BEFORE">
+	  		SELECT IFNULL(MAX(SAMPLE_ID), 0) + 1 FROM COM_SAMPLE
+	  	</selectKey>
+		INSERT INTO COM_SAMPLE 
+		(
+			SAMPLE_ID, 
+			LANGUAGE_CD,
+			SAMPLE_NAME, 
+			SAMPLE_TYPE,
+			USE_YN, 
+			REG_USER_SNO,
+			REG_DATETIME
+		)
+		VALUES
+		(
+			#{sample_id}, 
+			#{language_cd},
+			#{sample_name}, 
+			#{sample_type},
+			'Y',
+			#{reg_user_sno},
+			NOW()
+		)
+	</insert>
+	
+	<select id="selectSampleInfo" resultType="kr.co.shovvel.dm.domain.sample.SampleDomain">
+		SELECT 	
+			COM_SAMPLE.SAMPLE_ID,
+			COM_SAMPLE.SAMPLE_NAME,
+			COM_SAMPLE.SAMPLE_TYPE,
+			(
+				SELECT CD_NM 
+				FROM COM_CD_MAP
+				WHERE 1=1 
+				AND COM_CD = COM_SAMPLE.SAMPLE_TYPE
+				AND COM_CD_MAP.LANGUAGE_CLCD = #{condition.language_cd}
+			 ) AS SAMPLE_TYPE_NAME,
+			DATE_FORMAT(CONVERT_TZ(COM_SAMPLE.REG_DATETIME, '+00:00', #{zoneOffset}), '%Y-%m-%d %H:%i:%s') AS REG_DATETIME
+		FROM COM_SAMPLE 
+		WHERE 1=1
+		AND COM_SAMPLE.SAMPLE_ID = #{sample_id}
+	</select>
+	
+	<update id="updateSample">
+		UPDATE COM_SAMPLE SET
+			LANGUAGE_CD = #{language_cd},
+			SAMPLE_NAME = #{sample_name}, 
+			SAMPLE_TYPE = #{sample_type},
+			REG_USER_SNO = #{reg_user_sno},
+			REG_DATETIME = NOW()
+		WHERE 1=1
+		AND COM_SAMPLE.SAMPLE_ID = #{sample_id}
+	</update>
+	
+	<delete id="deleteSample">
+		UPDATE COM_SAMPLE SET
+			USE_YN =  #{use_yn}
+		WHERE 1=1
+		AND COM_SAMPLE.SAMPLE_ID = #{sample_id}
+	</delete>
+	
+	<select id="selectExcelList" resultType="java.util.LinkedHashMap">
+		SELECT 	   
+			COM_SAMPLE.SAMPLE_ID AS '예제 ID',
+			COM_SAMPLE.SAMPLE_NAME AS '예제 NAME',
+			COM_SAMPLE.SAMPLE_TYPE AS '예제 TYPE',
+			(
+				SELECT CD_NM 
+				FROM COM_CD_MAP
+				WHERE 1=1 
+				AND COM_CD = COM_SAMPLE.SAMPLE_TYPE
+				AND COM_CD_MAP.LANGUAGE_CLCD = #{condition.language_cd}
+			 ) AS '예제 Type',
+			DATE_FORMAT(CONVERT_TZ(COM_SAMPLE.REG_DATETIME, '+00:00', #{condition.zoneOffset}), '%Y-%m-%d %H:%i:%s') AS '예제 등록일'
+		FROM COM_SAMPLE
+		WHERE 1=1  
+		AND	USE_YN = 'Y'
+		<if test="condition.search_sample_type != null and condition.search_sample_type != ''" >
+			AND COM_SAMPLE.SAMPLE_TYPE = '%${condition.search_sample_type}%'
+		</if>
+		<if test="condition.search_sample_name != null and condition.search_sample_name != ''" >
+			AND COM_SAMPLE.SAMPLE_NAME LIKE '%${condition.search_sample_name}%'
+		</if>
+		<if test="condition.language_cd != null and condition.language_cd != ''" >
+			AND COM_SAMPLE.LANGUAGE_CD = #{condition.language_cd}
+		</if>
+		ORDER BY COM_SAMPLE.SAMPLE_ID
+	</select>
+	
+</mapper>

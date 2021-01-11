@@ -101,4 +101,19 @@ public class LogisService {
     public LogisUserInfo searchUserAddress(String userUid) {
         return logisMapper.searchUserAddress(userUid);
     }
+
+    /**
+     * 창고를 대여하고 있는지 확인한다.
+     * 대여중인 창고 또는 신청한 창고가 있으면 - true
+     * 대여중인 창고가 없으면 - false;
+     */
+    public boolean checkUsingWarehouse(String userUid) {
+        String orderInfoUid = logisMapper.checkUsingWarehouse(userUid);
+
+        if (orderInfoUid == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

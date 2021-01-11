@@ -12,7 +12,8 @@ public interface WarehouseApplyMapper {
 
     List<WarehouseInfo> getWarehouseName();
 
-    List<WarehouseInfo> getUsingWarehouseName(@Param(value = "userUid") String userUid);
+    List<WarehouseInfo> getUsingWarehouseName(@Param(value = "userUid") String userUid,
+                                              @Param(value = "date") String date);
 
     List<WarehouseInfo> searchAvailableWarehouse(@Param(value = "startDatetime") String startDatetime,
                                                  @Param(value = "endDatetime") String endDatetime,

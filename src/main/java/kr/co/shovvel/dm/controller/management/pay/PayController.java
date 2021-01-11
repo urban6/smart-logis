@@ -68,15 +68,17 @@ public class PayController {
     public String sellerKey = "S0FSJE";
     PaycoUtil util = new PaycoUtil("DEV"); // CommonUtil
     */
-    
+
     // 취소, 환불, 영수증을 위한 데이터 가져오기
     @RequestMapping(value = "getApproval")
     public void getApproval(HttpServletRequest request, Model model) {
         String orderInfoUid = request.getParameter("orderInfoUid");
         SellerApprovalVO approvalInfo = payService.getArroval(orderInfoUid);
 
-        model.addAttribute("approvalInfo", approvalInfo);
+        // 물류 환불할 때 - 테스트 진행중
+        // SellerApprovalVO approvalInfo = payService.getArrovalLogis(logisOrderUid);
 
+        model.addAttribute("approvalInfo", approvalInfo);
     }
 
     @RequestMapping(value = "payco_return_test")
@@ -857,7 +859,6 @@ public class PayController {
                     // TODO: handle exception
                     e.printStackTrace();
                 }
-
             }
 
             /* 부분 취소 할 상품정보 */

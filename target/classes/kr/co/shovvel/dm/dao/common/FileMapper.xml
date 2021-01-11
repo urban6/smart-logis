@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.common.FileMapper">
+	
+	<select id="getFile" resultType="kr.co.shovvel.dm.domain.common.CommonFile">
+		SELECT FILE_NO,
+			PHY_FILENAME,
+			ORG_FILENAME,
+			FILE_TYPE,
+			DELETE_YN,
+			REG_DATE,
+			USER_SNO
+		FROM T_FILE
+		WHERE FILE_NO = #{file_no}
+	</select>
+	
+	<insert id="insertFile">
+		<selectKey keyProperty="file_sno" resultType="String" order="BEFORE">
+	  		SELECT IFNULL(MAX(FILE_SNO), 0) + 1 FROM COM_FILE
+	  	</selectKey>
+		INSERT INTO COM_FILE (
+			FILE_SNO, 
+			FILE_CLCD, 
+			FILE_REAL_NM, 
+			FILE_SAVE_NM, 
+			FILE_SZ, 
+			INS_DT, 
+			INS_USER_SNO, 
+			UPD_DT, 
+			UPD_USER_SNO
+		) VALUES (
+			#{file_sno}, 
+			#{file_clcd},
+			#{file_real_nm}, 
+			#{file_save_nm}, 
+			#{file_sz},
+			NOW(),
+			#{ins_user_sno},
+			NOW(), 
+			#{ins_user_sno}
+		)
+	</insert>
+	
+	<update id="deleteFilesByType">
+		UPDATE T_FILE SET
+			DELETE_YN = 'Y'
+		WHERE
+			FILE_TYPE = #{file_type}
+			AND DELETE_YN = 'N'
+	</update>
+	
+	<select id="getYamlFile" resultType="kr.co.shovvel.dm.domain.common.CommonFile">
+		SELECT FILE_NO,
+			PHY_FILENAME,
+			ORG_FILENAME,
+			FILE_TYPE,
+			DELETE_YN,
+			REG_DATE,
+			USER_SNO
+		FROM T_FILE
+		WHERE FILE_TYPE = 'YAML'
+			AND DELETE_YN = 'N'
+		ORDER BY FILE_NO DESC
+		LIMIT 1
+	</select>
+	
+	<select id="getYamlFileSA" resultType="kr.co.shovvel.dm.domain.common.CommonFile">
+		SELECT FILE_NO,
+			PHY_FILENAME,
+			ORG_FILENAME,
+			FILE_TYPE,
+			DELETE_YN,
+			REG_DATE,
+			USER_SNO
+		FROM T_FILE
+		WHERE FILE_TYPE = #{file_type}			
+		  AND FILE_NO = #{file_no}
+		  AND DELETE_YN = 'N'
+	</select>
+	
+	<update id="updateFile">
+ 		UPDATE T_FILE
+ 		   SET PHY_FILENAME = #{phy_filename},
+			   ORG_FILENAME = #{org_filename},			   
+			   REG_DATE = NOW(),
+			   USER_SNO = #{user_sno}
+ 		 WHERE FILE_NO = #{file_no} 
+ 	</update>
+ 	
+</mapper>

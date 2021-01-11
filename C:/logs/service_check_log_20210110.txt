@@ -1,0 +1,2 @@
+[20210110 04:27:29][주문취소요청] [callUrl :https://api-bill.payco.com/outseller/order/cancel ] {"requestMemo":null,"orderNo":"202101092396902192","orderCertifyKey":"4Bd8hKHIjxC5mIhi1OtgsPZMXxsCj47SL7mzemmt2NECC","cancelTotalAmt":3500,"sellerKey":"F1S8YJ","totalCancelTaxableAmt":null,"totalCancelVatAmt":null,"totalCancelPossibleAmt":"0","sellerOrderReferenceKey":"WAREHOUSE@1@2659523845","totalCancelTaxfreeAmt":null}
+[20210110 04:27:29][주문취소결과] {"code":1021,"message":"허용되지 않은 IP 입니다.","redirectUrl":null}

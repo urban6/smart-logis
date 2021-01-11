@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.operation.loginhist.LoginHistMapper">
+
+	<select id="listUserGroup" resultType="java.util.Map">
+		SELECT 'all' AS ID
+	         , 'ALL' AS NAME
+		UNION
+		(SELECT GROUP_NO   AS ID
+		      , GROUP_NAME AS NAME
+		   FROM ONC_COM_USER_GROUP
+		  WHERE 1=1
+		  ORDER BY GROUP_NO)
+	</select>
+
+	<select id="listUserLevel" resultType="java.util.Map">
+		SELECT 'all' AS ID
+	         , 'ALL' AS NAME
+		UNION
+		(SELECT LEVEL_ID    AS ID
+		      , LEVEL_TITLE AS NAME
+		   FROM ONC_COM_USER_LEVEL
+		  WHERE 1=1
+		    AND LEVEL_ID <![CDATA[>=]]> #{userLevelId}
+		  ORDER BY LEVEL_ID)
+	</select>
+
+	<select id="count" resultType="int">
+		  SELECT COUNT(*)
+		  FROM ONC_COM_USER_LOGIN_HIST A
+		     , ONC_COM_USER B
+		     , ONC_COM_USER_LEVEL D
+		 WHERE 1=1
+		   AND A.USER_SNO = B.USER_SNO
+		   AND B.LEVEL_ID = D.LEVEL_ID
+		   AND A.LOGIN_DATE BETWEEN STR_TO_DATE(#{condition.startDate}, '%Y-%m-%d %H:%i:%s') AND STR_TO_DATE(#{condition.endDate}, '%Y-%m-%d %H:%i:%s')
+
+		   <if test="condition.levelId != 'all' and condition.levelId != '' and condition.levelId != null" >
+		   AND D.LEVEL_ID = #{condition.levelId}
+		   </if>
+
+		   <if test="condition.userSno != '' and condition.userSno != null">
+		   AND B.LOGIN_ID LIKE CONCAT('%', #{condition.userSno , jdbcType=CHAR}, '%')
+		   </if>
+
+		   <if test="condition.userFnm != '' and condition.userFnm != null">
+		   AND B.USER_FNM LIKE CONCAT('%', #{condition.userFnm , jdbcType=CHAR}, '%')
+		   </if>
+	</select>
+
+	<select id="list" resultType="kr.co.shovvel.dm.domain.management.operation.loginhist.LoginHistDomain">
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_header" />
+			SELECT A.USER_SNO
+			     , B.LOGIN_ID
+			     , D.LEVEL_ID
+			     , D.LEVEL_TITLE
+			     , B.USER_FNM
+			     , A.DESCRIPTION
+			     , A.LOGIN_IP
+			     , DATE_FORMAT(A.LOGIN_DATE, '%Y-%m-%d %H:%i:%s') AS LOGIN_DATE
+			     , DATE_FORMAT(A.LOGOUT_DATE, '%Y-%m-%d %H:%i:%s') AS LOGOUT_DATE
+			  FROM ONC_COM_USER_LOGIN_HIST A
+			     , ONC_COM_USER B
+			     , ONC_COM_USER_LEVEL D
+		     WHERE 1=1
+			   AND A.USER_SNO = B.USER_SNO
+		   	   AND B.LEVEL_ID = D.LEVEL_ID
+			   AND A.LOGIN_DATE BETWEEN STR_TO_DATE(#{condition.startDate}, '%Y-%m-%d %H:%i:%s') AND STR_TO_DATE(#{condition.endDate}, '%Y-%m-%d %H:%i:%s')
+
+			   <if test="condition.levelId != 'all' and condition.levelId != '' and condition.levelId != null" >
+			   AND D.LEVEL_ID = #{condition.levelId}
+			   </if>
+
+			   <if test="condition.userSno != '' and condition.userSno != null">
+			   AND B.LOGIN_ID LIKE CONCAT('%', #{condition.userSno , jdbcType=CHAR}, '%')
+			   </if>
+
+			   <if test="condition.userFnm != '' and condition.userFnm != null">
+			   AND B.USER_FNM LIKE CONCAT('%', #{condition.userFnm , jdbcType=CHAR}, '%')
+			   </if>
+
+			   <if test="condition.orderBy != '' and condition.orderBy != null">
+			   ORDER BY ${condition.orderBy}
+			   </if>
+
+			   <if test="condition.orderBy == '' or condition.orderBy == null">
+			   ORDER BY LOGIN_DATE DESC
+			   </if>
+
+		<include refid="kr.co.shovvel.dm.dao.common.CommonMapper.paging_footer" />
+	</select>
+
+	<insert id="insertLoginHistory" parameterType="kr.co.shovvel.dm.domain.management.operation.loginhist.LoginHistDomain">
+		INSERT INTO ONC_COM_USER_LOGIN_HIST (
+              USER_SNO
+             <if test="condition.login_result != null and condition.login_result != ''">
+             ,LOGIN_RESULT
+             </if>
+             <if test="condition.login_ip != null and condition.login_ip != ''">
+             ,LOGIN_IP
+             </if>
+             <if test="condition.inout != null and condition.inout != '' and condition.inout == 'IN'">
+             , LOGIN_DATE
+             </if>
+             <if test="condition.inout != null and condition.inout != '' and condition.inout == 'OUT'">
+             , LOGOUT_DATE
+             </if>
+             <if test="condition.description != null and condition.description != ''">
+             ,DESCRIPTION
+             </if>
+             <if test="condition.fail_count != null and condition.fail_count != ''">
+             ,FAIL_COUNT
+             </if>
+             <if test="condition.session_id != null and condition.session_id != ''">
+             ,SESSION_ID
+             </if>
+        ) VALUES (
+              #{condition.user_sno}
+             <if test="condition.login_result != null and condition.login_result != ''">
+             ,#{condition.login_result}
+             </if>
+             <if test="condition.login_ip != null and condition.login_ip != ''">
+             ,#{condition.login_ip}
+             </if>
+             <if test="condition.inout != null and condition.inout != '' and condition.inout == 'IN'">
+             ,#{condition.login_date}
+             </if>
+             <if test="condition.inout != null and condition.inout != '' and condition.inout == 'OUT'">
+             , NOW()
+             </if>
+             <if test="condition.description != null and condition.description != ''">
+             ,#{condition.description}
+             </if>
+             <if test="condition.fail_count != null and condition.fail_count != ''">
+             , #{condition.fail_count}
+             </if>
+             <if test="condition.session_id != null and condition.session_id != ''">
+             , #{condition.session_id}
+             </if>
+        )
+    </insert>
+
+    <update id="updateLoginHistory" parameterType="kr.co.shovvel.dm.domain.management.operation.loginhist.LoginHistDomain">
+        UPDATE ONC_COM_USER_LOGIN_HIST SET
+			USER_SNO = #{condition.user_sno}
+			<if test="condition.description != null and condition.description != ''">
+             , DESCRIPTION  = #{condition.description}
+             </if>
+             <if test="condition.login_result != null and condition.login_result != ''">
+             ,LOGIN_RESULT = #{condition.login_result}
+             </if>
+             <if test="condition.login_ip != null and condition.login_ip != ''">
+             ,LOGIN_IP = #{condition.login_ip}
+             </if>
+             <if test="condition.inout != null and condition.inout != '' and condition.inout == 'OUT'">
+             ,LOGOUT_DATE = NOW()
+             </if>
+             <if test="condition.logout_result != null and condition.logout_result != '' and condition.logout_result == 'OUT'">
+             ,LOGOUT_RESULT = #{condition.logout_result}
+             </if>
+		WHERE
+			USER_SNO  = #{condition.user_sno}
+		AND LOGIN_DATE = #{condition.login_date}
+		<if test="condition.login_ip != null and condition.login_ip != ''">
+		AND LOGIN_IP = #{condition.login_ip}
+		</if>
+    </update>
+
+</mapper>

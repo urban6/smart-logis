@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>common configuration</comment>
+
+	<!-- db정보 -->
+	<entry key="jdbc.driverClass.master">com.mysql.jdbc.Driver</entry>
+<!-- 	<entry key="jdbc.url.master">jdbc:mysql://172.18.39.16:3306/snuhdbdev?characterEncoding=utf-8&amp;allowMultiQueries=true</entry> -->
+    <entry key="jdbc.url.master">jdbc:mysql://172.18.39.16:3306/snuhdbdev?characterEncoding=utf-8&amp;allowMultiQueries=true</entry>
+	<entry key="jdbc.username.master">snuh</entry>
+	<entry key="jdbc.password.master">snuH1234567!</entry>
+
+	<!-- system location -->
+	<entry key="system.location"></entry>
+	<entry key="path.directory.upload">D:/temp/snuhUpload</entry>
+	<entry key="appVer">snuhdbdev</entry>
+	
+
+	<!-- fileDirectoryUrl -->
+	<!-- <entry key="baseContentsUrl">https://disease.coach-health.com/contents</entry> -->
+	<entry key="baseContentsUrl">/contents</entry>
+	<!-- WebSocket URL -->
+	<entry key="url.ws.call.help">ws://172.18.39.16:80/ws/connect/all</entry>
+    
+    <!-- WebSocket URL 
+	<entry key="url.ws.exrm.status">ws://localhost:8080/ws/connect/exrm</entry>
+	<entry key="url.ws.hmps.status">ws://localhost:8080/ws/connect/hmps</entry>
+	-->
+	<!-- fileDirectoryPath -->
+	<entry key="fileDirectoryPath">/storage_dmb2c/attach/nas_dmb2c_data/auxiliary/contents</entry>
+	<entry key="userFilePath">/image/user/profile</entry>
+	<entry key="systemFilePath">/image/system</entry>
+	<entry key="counselPath">/image/counsel</entry>
+	<entry key="noticeFilePath">/image/notice</entry>
+	<entry key="faqFilePath">/image/faq</entry>
+	<entry key="eventFilePath">/image/event</entry>
+	<entry key="communityFilePath">/image/community</entry>
+	<entry key="contentsFilePath">/image/contents</entry>
+	<entry key="bannerFilePath">/image/banner</entry>
+	<entry key="systemCounselPath">/image/systemcounsel</entry>
+
+	<!-- appURL -->
+	<entry key="appUrlAndroid">https://globalm-dm-dev.health-on.co.kr/contents/app/</entry>
+	<entry key="appUrlIOS">https://globalm-dm-dev.health-on.co.kr/contents/app/</entry>
+    <entry key="his.url">http://hisdevweb.snuh.org/webservice/MS/GN/CtiWebService</entry>
+
+	<!-- If value <= 0 not use timeout -->
+	<entry key="login.session.timeout">60</entry>
+	<entry key="default.restful.socket.timeout">5000</entry>
+	<entry key="default.restful.connect.timeout">5000</entry>
+	<entry key="default.restful.connection.request.timeout">5000</entry>
+	<entry key="deploy.restful.socket.timeout">30000</entry>
+	<entry key="deploy.restful.connect.timeout">30000</entry>
+	<entry key="deploy.restful.connection.request.timeout">30000</entry>
+
+	<!-- 패스워드 초기값 -->
+	<entry key="initPassword">Password1!</entry>
+
+	<!-- Database Zone Time Offset -->
+	<entry key="database.zoneoffset">+0900</entry>
+
+
+	<!-- 개발자 ID. 서버 재기동시 해당 ID만 로그아웃 처리, 공백일 경우 모든 사용자를 로그아웃 처리 -->
+	<entry key="developerId">admin</entry>
+	<entry key="executeBatch">false</entry>
+
+</properties>

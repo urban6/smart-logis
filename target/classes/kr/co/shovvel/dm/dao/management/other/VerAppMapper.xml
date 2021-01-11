@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.management.other.VerAppMapper">
+
+	<sql id="sqlVerApp">
+		<![CDATA[
+		SELECT	A.VER_APP_NUM /*버전 식별번호*/
+			,	A.VER_APP_TYPE /*버전 타입 (P: 공용앱)*/
+			,	A.VER_APP_NO /*버전 번호*/
+			,	A.VER_APP_STR /*버전 표시명*/
+			,	A.VER_APP_FILE_NM /*파일명*/
+			,	A.VER_APP_FILE_PATH /*파일 경로*/
+			,	A.VER_APP_FILE_SIZE	/*파일 크기*/
+			,	A.VER_APP_CNTE /*버전 내용*/
+			,	A.VER_APP_DEL_YN /*버전 삭제 여부*/
+			,	A.VER_APP_REG_USER_SNO /*버전 등록자*/
+			,	DATE_FORMAT( A.VER_APP_REG_DT, "%Y년 %c월 %e일")	AS	VER_APP_REG_DT	/*버전 등록일시*/
+			,	DATE_FORMAT( A.VER_APP_REG_DT, "%Y년 %c월 %e일 %T")	AS	VER_APP_REG_DT_TIME	/*버전 등록일시*/
+			,	A.VER_APP_MOD_USER_SNO /*버전 수정자*/
+			,	DATE_FORMAT( A.VER_APP_MOD_DT, "%Y년 %c월 %e일")	AS	VER_APP_MOD_DT	/*버전 수정일시*/
+			,	DATE_FORMAT( A.VER_APP_MOD_DT, "%Y년 %c월 %e일 %T")	AS	VER_APP_MOD_DT_TIME	/*버전 수정일시*/
+		FROM	VER_APP	A
+		WHERE	A.VER_APP_NUM	>	0
+		]]>
+	</sql>
+
+	<!-- 기타 관리 > 앱 버전 관리 목록 -->
+	<select id="selectVerAppList" resultType="kr.co.shovvel.dm.domain.management.other.VerAppDomainVO">
+		<include refid="sqlVerApp" />
+			AND	A.VER_APP_DEL_YN	!=	'Y'
+			AND	A.VER_APP_TYPE		=	'P'
+		ORDER	BY	A.VER_APP_NUM	DESC,	A.VER_APP_STR	DESC
+	</select>
+
+	<!-- 기타 관리 > 앱 버전 관리 목록 건수 -->
+	<select id="selectCountVerAppList" resultType="int">
+		SELECT	COUNT(*)
+		FROM
+		(
+			<include refid="sqlVerApp" />
+				AND	A.VER_APP_DEL_YN	!=	'Y'
+				AND	A.VER_APP_TYPE		=	'P'
+		)	CNT
+	</select>
+
+	<!-- 기타 관리 > 앱 버전 관리 정보 -->
+	<select id="selectVerApp" resultType="kr.co.shovvel.dm.domain.management.other.VerAppDomainVO">
+		<include refid="sqlVerApp" />
+			AND	A.VER_APP_DEL_YN	!=	'Y'
+			AND	A.VER_APP_TYPE		=	'P'
+			AND	A.VER_APP_NUM		=	#{condition.verAppNum}
+			AND	A.VER_APP_NO		=	#{condition.verAppNo}
+			AND	A.VER_APP_STR		=	#{condition.verAppStr}
+	</select>
+
+	<!-- 기타 관리 > 앱 버전 식별번호 -->
+	<select id="selectVerAppNum" resultType="integer">
+		SELECT	AUTO_INCREMENT
+		FROM	INFORMATION_SCHEMA.TABLES
+		WHERE	TABLE_SCHEMA	=	#{condition.dbPath}
+			AND	TABLE_NAME		=	'VER_APP'
+	</select>
+
+	<!-- 기타 관리 > 앱 버전 추가 -->
+	<insert id="insertVerApp" parameterType="kr.co.shovvel.dm.domain.management.other.VerAppUpFileDomain">
+		INSERT	INTO	VER_APP
+		(
+			VER_APP_STR
+		,	VER_APP_CNTE
+		,	VER_APP_REG_USER_SNO
+		)
+		VALUES
+		(
+			#{condition.verAppStr}
+		,	#{condition.verAppCnte}
+		,	#{condition.verAppUserSno}
+		)
+	</insert>
+
+	<!-- 기타 관리 > 앱 버전 정보 수정-->
+	<update id="updateVerApp" parameterType="kr.co.shovvel.dm.domain.management.other.VerAppUpFileDomain">
+		UPDATE	VER_APP
+		SET		VER_APP_STR		=	#{condition.verAppStr}
+			,	VER_APP_CNTE	=	#{condition.verAppCnte}
+			,	VER_APP_MOD_USER_SNO	=	#{condition.verAppUserSno}
+			,	VER_APP_MOD_DT			=	CURRENT_TIMESTAMP
+		WHERE	VER_APP_DEL_YN	=	'N'
+			AND	VER_APP_NUM		=	#{condition.verAppNum}
+			AND	VER_APP_NO	=	#{condition.verAppNo}
+			AND	VER_APP_STR	=	#{condition.verAppStrOld}
+	</update>
+
+	<!-- 기타 관리 > 앱 버전 파일 정보 수정 -->
+	<update id="updateVerAppFile" parameterType="kr.co.shovvel.dm.domain.management.other.VerAppUpFileDomain">
+		UPDATE	VER_APP
+		SET		VER_APP_FILE_NM		=	#{condition.verAppFileName}
+			,	VER_APP_FILE_PATH	=	#{condition.verAppFilePath}
+			,	VER_APP_FILE_SIZE	=	#{condition.verAppFileSize}
+			,	VER_APP_MOD_USER_SNO=	#{condition.verAppUserSno}
+			,	VER_APP_MOD_DT		=	CURRENT_TIMESTAMP
+		WHERE	VER_APP_DEL_YN	=	'N'
+			AND	VER_APP_NUM		=	#{condition.verAppNum}
+			AND	VER_APP_NO		=	#{condition.verAppNo}
+			AND	VER_APP_STR		=	#{condition.verAppStrOld}
+	</update>
+
+	<!-- 기타 관리 > 앱 버전 정보 전체 수정 -->
+	<update id="updateVerAppInfo" parameterType="kr.co.shovvel.dm.domain.management.other.VerAppUpFileDomain">
+		UPDATE	VER_APP
+		SET		VER_APP_FILE_NM		=	#{condition.verAppFileName}
+			,	VER_APP_FILE_PATH	=	#{condition.verAppFilePath}
+			,	VER_APP_FILE_SIZE	=	#{condition.verAppFileSize}
+			,	VER_APP_STR			=	#{condition.verAppStr}
+			,	VER_APP_CNTE		=	#{condition.verAppCnte}
+			,	VER_APP_MOD_USER_SNO=	#{condition.verAppUserSno}
+			,	VER_APP_MOD_DT		=	CURRENT_TIMESTAMP
+		WHERE	VER_APP_DEL_YN	=	'N'
+			AND	VER_APP_NUM		=	#{condition.verAppNum}
+			AND	VER_APP_NO		=	#{condition.verAppNo}
+			AND	VER_APP_STR		=	#{condition.verAppStrOld}
+	</update>
+
+	<!-- 기타 관리 > 앱 버전 추가 -->
+	<update id="updateVerAppDelete" parameterType="kr.co.shovvel.dm.domain.management.other.VerAppUpFileDomain">
+		UPDATE	VER_APP
+		SET		VER_APP_DEL_YN			=	'Y'
+			,	VER_APP_MOD_USER_SNO	=	#{condition.verAppUserSno}
+			,	VER_APP_MOD_DT			=	CURRENT_TIMESTAMP
+		WHERE	VER_APP_DEL_YN	=	'N'
+			AND	VER_APP_NUM		=	#{condition.verAppNum}
+			AND	VER_APP_NO		=	#{condition.verAppNo}
+			AND	VER_APP_STR		=	#{condition.verAppStrOld}
+	</update>
+
+</mapper>

@@ -27,8 +27,8 @@ public class WarehouseApplyService {
      *
      * @param userUid - 회원 고유번호
      */
-    public List<WarehouseInfo> getUsingWarehouseName(String userUid) {
-        return warehouseApplyMapper.getUsingWarehouseName(userUid);
+    public List<WarehouseInfo> getUsingWarehouseName(String userUid, String date) {
+        return warehouseApplyMapper.getUsingWarehouseName(userUid, date);
     }
 
     /**

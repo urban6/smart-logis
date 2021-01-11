@@ -24,4 +24,6 @@ public interface LogisMapper {
     void updatePayStateInOrderInfo(@Param(value = "salesUid") String salesUid, @Param(value = "logisOrderUid") int logisOrderUid);
 
     LogisUserInfo searchUserAddress(@Param(value = "userUid") String userUid);
+
+    String checkUsingWarehouse(@Param(value = "userUid") String userUid);
 }

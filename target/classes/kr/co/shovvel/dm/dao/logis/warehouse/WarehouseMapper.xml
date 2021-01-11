@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.shovvel.dm.dao.logis.warehouse.WarehouseMapper">
+
+    <select id="getProductInfo" resultType="kr.co.shovvel.dm.domain.management.pay.SellerProductInfoVO">
+        SELECT *
+        FROM seller_product_info
+    </select>
+
+    <!-- 해당 유저와 관련된 창고 신청 내역을 조회한다. -->
+    <select id="searchWarehouseOrderInfo" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT ORDER_INFO_UID, USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+        w.WAREHOUSE_NAME AS WAREHOUSE_NAME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, woi.PRICE AS PRICE,
+        PAY_TYPE, IS_PAY
+        FROM warehouse_order_info AS woi
+        JOIN warehouse AS w ON woi.WAREHOUSE_UID = w.WAREHOUSE_UID
+        <![CDATA[
+        WHERE USER_UID = #{userUid} AND STATUS >= 1
+        ]]>
+        ORDER BY ORDER_INFO_UID DESC;
+    </select>
+    
+    <!-- 빌려준 창고 내역 조회 -->
+    <select id="serchRentWarehouse" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        <![CDATA[
+	        SELECT 
+	        	woi.ORDER_INFO_UID, 
+	        	woi.USER_UID, 
+	        	DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+	        	DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+	        	SIZE, 
+	        	DATE(REQUEST_TIME) AS REQUEST_TIME, 
+	        	woi.STATUS, 
+	        	woi.PRICE AS PRICE,
+            	uc.COMPANY_NAME
+	        FROM warehouse_order_info AS woi
+	        JOIN user_company AS uc ON uc.COMPANY_UID = woi.COMPANY_UID
+	        WHERE 
+	        	woi.WAREHOUSE_UID  = #{warehouseUid}
+	        AND 
+	        	now() < woi.END_TIME
+	        ORDER BY woi.REQUEST_TIME DESC
+        ]]>
+    </select>
+    
+     <!-- 빌려준 창고 과거 내역 조회 -->
+    <select id="serchRentWarehouseBefore" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        <![CDATA[
+	        SELECT 
+	        	woi.ORDER_INFO_UID, 
+	        	woi.USER_UID, 
+	        	DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+	        	DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+	        	SIZE, 
+	        	DATE(REQUEST_TIME) AS REQUEST_TIME, 
+	        	woi.STATUS, 
+	        	woi.PRICE AS PRICE,
+            	uc.COMPANY_NAME
+	        FROM warehouse_order_info AS woi
+	        JOIN user_company AS uc ON uc.COMPANY_UID = woi.COMPANY_UID
+	        WHERE 
+		        woi.WAREHOUSE_UID  = #{warehouseUid}
+	        AND 
+	        	now() > woi.END_TIME
+	        ORDER BY woi.REQUEST_TIME DESC
+	        	
+        ]]>
+    </select>
+    
+    <!-- 빌려준 창고에서 고객정보 조회 -->
+     <select id="searchRentWarehouseOrderInfoDetail" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT 
+	        	woi.ORDER_INFO_UID, 
+	        	woi.USER_UID, 
+	        	DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+	        	DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+	        	SIZE, 
+	        	DATE(REQUEST_TIME) AS REQUEST_TIME, 
+	        	woi.STATUS, 
+	        	woi.PRICE AS PRICE,
+	        	PAY_TYPE, 
+	        	IS_PAY,
+		        uc.COMPANY_NAME,
+		        uc.MANAGER_NAME,
+		        uc.PHONE_NUMBER
+	        FROM warehouse_order_info AS woi
+	        JOIN user_company AS uc ON uc.COMPANY_UID = woi.COMPANY_UID
+	        WHERE 
+	        	woi.ORDER_INFO_UID = #{orderInfoUid}
+    </select>
+    
+    <!-- 빌려준 창고 맡긴 품목 상세 아이템 조회 -->
+     <select id="rentWarehouseItemListDetail" parameterType="String" resultType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem">
+    	SELECT 
+    	  DATE_FORMAT(wi.IN_DATE,'%Y-%m-%d %H:%i') AS inDate,
+	      DATE_FORMAT(wi.OUT_DATE,'%Y-%m-%d %H:%i') AS outDate,
+		  wi.STATE,
+		  wi.ITEM_INFO,
+		  ws.SPACE_NAME,
+		  ws.RFID_UID
+		FROM warehouse_item wi
+		JOIN warehouse_space ws ON wi.SPACE_UID = ws.SPACE_UID
+		WHERE
+		  wi.ORDER_INFO_UID = #{orderInfoUid}
+    </select>
+    
+    <!-- 창고 space 현황 조회 -->
+    <select id="searchWarehouseSpace" parameterType="String" resultType="kr.co.shovvel.dm.domain.warehouse.WarehouseSpace">
+   	  SELECT 
+		  ws.SPACE_NAME,
+		  DATE_FORMAT(ws.START_DATETIME,'%Y-%m-%d %H:%i') AS START_DATETIME,
+	      DATE_FORMAT(ws.END_DATETIME,'%Y-%m-%d %H:%i') AS END_TIME,
+		  DATE_FORMAT(woi.START_TIME,'%Y-%m-%d %H:%i') AS START_TIME,
+	      DATE_FORMAT(woi.END_TIME,'%Y-%m-%d %H:%i') AS END_TIME,
+		  ws.SPACE_UID,
+		  us.COMPANY_NAME,
+		  ws.RFID_UID
+	  FROM warehouse_space ws
+	  LEFT OUTER JOIN 
+	  	 rfid ON ws.RFID_UID = rfid.RFID_UID
+	  LEFT OUTER JOIN 
+	  	 warehouse_order_info as woi ON woi.ORDER_INFO_UID = rfid.ORDER_INFO_UID
+	  LEFT OUTER JOIN 
+	   	 user_company as us ON woi.COMPANY_UID = us.COMPANY_UID
+	  WHERE 
+	  	 ws.WAREHOUSE_UID = #{warehouseUid}
+	  ORDER BY woi.END_TIME DESC
+    </select>
+    
+    <!-- 창고 space 상세 화면 -->
+    <select id="warehouseSpaceDetail" parameterType="String" resultType="Hashmap">
+    	SELECT 
+	        	woi.ORDER_INFO_UID as orderInfoUid,  
+	        	DATE_FORMAT(woi.START_TIME,'%Y-%m-%d %H:%i') AS startTime,
+	        	DATE_FORMAT(woi.END_TIME,'%Y-%m-%d %H:%i') AS endTime,
+	        	DATE_FORMAT(woi.REQUEST_TIME,'%Y-%m-%d %H:%i') AS requestTime,
+		        uc.COMPANY_NAME as companyName,
+		        uc.MANAGER_NAME as managerName,
+		        uc.PHONE_NUMBER as phoneNumber,
+	            wi.ITEM_INFO as itemInfo,
+	            wi.STATE as state,
+	            DATE_FORMAT(wi.IN_DATE,'%Y-%m-%d %H:%i') as inDate,
+            	rfid.RFID_UID as rfidUid
+	      FROM warehouse_item AS wi
+          JOIN warehouse_order_info AS woi ON wi.ORDER_INFO_UID = woi.ORDER_INFO_UID
+	      JOIN user_company AS uc ON uc.COMPANY_UID = woi.COMPANY_UID
+          JOIN rfid ON wi.ITEM_UID = rfid.ITEM_UID
+	      WHERE 
+	        	wi.STATE = 1
+          AND 
+            wi.SPACE_UID = #{spaceUid}
+    </select>
+    
+    <select id="findWarehouseUid" parameterType="String" resultType="String">
+    	SELECT 
+    		uc.WAREHOUSE_UID
+    	FROM user u
+    	JOIN user_company AS uc ON uc.COMPANY_UID = u.COMPANY_UID
+    	WHERE 
+    		u.USER_UID = #{userUid}
+    		
+    </select>
+    
+
+    <select id="searchWarehouseOrderInfoDetail" parameterType="string"
+            resultType="kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo">
+        SELECT ORDER_INFO_UID,USER_UID, DATE_FORMAT(START_TIME,'%Y-%m-%d %H:%i') AS START_TIME, w.WAREHOUSE_NAME AS
+        WAREHOUSE_NAME, WAREHOUSE_ADDRESS,
+        DATE_FORMAT(END_TIME,'%Y-%m-%d %H:%i') AS END_TIME, SIZE, DATE(REQUEST_TIME) AS REQUEST_TIME, STATUS, woi.PRICE
+        AS PRICE, PAY_TYPE, IS_PAY
+        FROM warehouse_order_info AS woi
+        JOIN warehouse AS w ON woi.WAREHOUSE_UID = w.WAREHOUSE_UID
+        WHERE ORDER_INFO_UID = #{orderInfoUid}
+    </select>
+
+    <!-- 현재 로그인한 사용자의 회사 위치를 조회한다. -->
+    <select id="searchComapanyAddress" parameterType="string" resultType="string">
+        SELECT ADDRESS
+        FROM user u, user_company uc
+        WHERE u.COMPANY_UID = uc.COMPANY_UID
+        AND u.USER_UID = #{userUid};
+    </select>
+
+    <!-- 창고 공유 신청 -->
+    <insert id="addWarehouseLend" parameterType="kr.co.shovvel.dm.domain.logis.warehouse.WarehouseLendInfo"
+            useGeneratedKeys="true" keyProperty="lendOrderUid">
+        INSERT INTO warehouse_lend_order(USER_UID, WAREHOUSE_NAME, COMPANY_NAME, PHONE_NUMBER, WAREHOUSE_ADDRESS,
+                                         WAREHOUSE_POSTCODE, WAREHOUSE_SIZE, SPACE_PRICE)
+        VALUES (#{userUid}, #{warehouseName}, #{companyName}, #{phoneNumber}, #{warehouseAddress}, #{warehousePostcode},
+                #{warehouseSize}, #{spacePrice});
+    </insert>
+
+    <select id="searchCompanyUid" parameterType="int" resultType="int">
+        SELECT COMPANY_UID
+        FROM user
+        WHERE USER_UID = #{userUid};
+    </select>
+</mapper>

@@ -5,6 +5,8 @@ import kr.co.shovvel.dm.common.Consts;
 import kr.co.shovvel.dm.dao.logis.warehouse.apply.WarehouseApplyMapper;
 import kr.co.shovvel.dm.domain.logis.apply.LogisOrderInfo;
 import kr.co.shovvel.dm.domain.logis.search.WarehouseSearchInfo;
+import kr.co.shovvel.dm.domain.logis.user.LogisUser;
+import kr.co.shovvel.dm.domain.logis.user.UserCompany;
 import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseLendInfo;
 import kr.co.shovvel.dm.domain.logis.warehouse.WarehouseOrderInfo;
 import kr.co.shovvel.dm.domain.warehouse.WarehouseInfo;
@@ -15,10 +17,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.apache.log4j.Logger;
 
@@ -76,7 +75,7 @@ public class WarehouseController {
         String endDatetime = (String) param.get("endDatetime");
         int spaceSize = Integer.parseInt(param.get("spaceSize").toString());
 
-        
+
         // 사용자가 선택한 조건의 창고 정보를 가져온다.
         WarehouseInfo info = warehouseApplyService.searchSelectedWarehouse(warehouseUid, startDatetime, endDatetime, spaceSize);
 
@@ -85,7 +84,7 @@ public class WarehouseController {
         mav.setViewName("logis/apply/warehouseApplyDetail");
         return mav;
     }
-    
+
     @RequestMapping("/paycoTest")
     public ModelAndView paycoTest(HttpServletResponse response, @RequestParam Map<String, Object> param) {
         response.setHeader("Cache-Control", "no-cache");
@@ -104,7 +103,7 @@ public class WarehouseController {
         mav.setViewName("logis/apply/paycotest");
         return mav;
     }
-    
+
     @RequestMapping("/paying_test")
     public ModelAndView paying_test(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         String userUid = "1";
@@ -139,34 +138,32 @@ public class WarehouseController {
         mav.addObject("infoList", infoList);
         return mav;
     }
-    
-    @RequestMapping("/findWarehouseUid")
-    public void findWarehouseUid(HttpServletResponse response, HttpServletRequest request, Model model) {
-        response.setHeader("Cache-Control", "no-cache");
 
+    /**
+     * 사용자가 창고를 임대했는지 확인을 한다.
+     */
+    @RequestMapping(value = "/findWarehouseUid", method = RequestMethod.POST)
+    public void findWarehouseUid(HttpServletRequest request, Model model) {
         HttpSession session = request.getSession();
         String userUid = (String) session.getAttribute("userUid");
 
         String warehouseUid = warehouseService.findWarehouseUid(userUid);
-        logger.debug("warehouseUid: "+warehouseUid);
-        if(warehouseUid != null) {
-        	model.addAttribute("warehouseUid", warehouseUid);
-        	logger.debug("warehouseUid: "+warehouseUid);
-        	model.addAttribute("code", 0);
-        }else {
-        	model.addAttribute("code", 1);
+        if (warehouseUid != null) {
+            model.addAttribute("warehouseUid", warehouseUid);
+            model.addAttribute("code", 0);
+        } else {
+            model.addAttribute("code", 1);
         }
-
     }
-    
+
     @RequestMapping("/rentSearch")
     public ModelAndView rentSearch(HttpServletResponse response, HttpServletRequest request, Model model) {
         response.setHeader("Cache-Control", "no-cache");
-        // home 화면에서 고치면 uid 받아서 해야함
-//        String warehouseUid =request.getParameter("warehouseUid");
-        String warehouseUid ="1";
-        
+
+        String warehouseUid = request.getParameter("warehouseUid");
+
         List<WarehouseSearchInfo> infoList = warehouseService.serchRentWarehouse(warehouseUid);
+
         List<WarehouseSearchInfo> infoListBefore = warehouseService.serchRentWarehouseBefore(warehouseUid);
         List<WarehouseSpace> spaceList = warehouseService.searchWarehouseSpace(warehouseUid);
 
@@ -177,7 +174,7 @@ public class WarehouseController {
         mav.addObject("infoListBefore", infoListBefore);
         return mav;
     }
-    
+
     @RequestMapping("/rentSearchDetail")
     public ModelAndView rentSearchDetail(HttpServletResponse response, HttpServletRequest request, Model model) {
         response.setHeader("Cache-Control", "no-cache");
@@ -189,20 +186,20 @@ public class WarehouseController {
 
         ModelAndView mav = new ModelAndView();
         mav.addObject("info", info);
-        mav.addObject("itemList",itemList);
+        mav.addObject("itemList", itemList);
         mav.setViewName("logis/search/rentWarehouseSearchDetail");
         return mav;
     }
-    
+
     @RequestMapping("/rentSpaceDetail")
     public ModelAndView rentSpaceDetail(HttpServletResponse response, HttpServletRequest request, Model model) {
         response.setHeader("Cache-Control", "no-cache");
 
         String spaceUid = request.getParameter("spaceUid");
-        
+
         List<HashMap<String, Object>> itemList = warehouseService.warehouseSpaceDetail(spaceUid);
         ModelAndView mav = new ModelAndView();
-        mav.addObject("itemList",itemList);
+        mav.addObject("itemList", itemList);
         mav.setViewName("logis/search/rentSpaceDetail");
         return mav;
     }
@@ -315,7 +312,7 @@ public class WarehouseController {
         mav.addObject("type", "warehouse");
         mav.addObject("isStatus", "P"); // 페이코만 사용하기로 결정함
         mav.addObject("quantity", quantity);
-        mav.addObject("productKey", "5");
+        mav.addObject("productKey", "7");
 
         mav.setViewName("logis/pay/paying");
         return mav;

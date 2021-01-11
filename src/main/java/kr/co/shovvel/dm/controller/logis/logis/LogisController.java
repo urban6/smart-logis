@@ -54,13 +54,13 @@ public class LogisController {
         String userUid = (String) session.getAttribute("userUid");
 
         // 현재 대여하고 있는 창고 리스트
-        List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
+        // List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
 
         // 회원의 기본적인 정보를 가져온다 (이름, 연락처, 우편번호, 주소, 상세주소)
         LogisUserInfo info = logisService.searchUserAddress(userUid);
 
         ModelAndView mav = new ModelAndView();
-        mav.addObject("warehouseNameList", warehouseNameList);
+        // mav.addObject("warehouseNameList", warehouseNameList);
         mav.addObject("userInfo", info);
         mav.setViewName("logis/apply/logisApply");
         return mav;
@@ -77,13 +77,13 @@ public class LogisController {
         String userUid = (String) session.getAttribute("userUid");
 
         // 현재 대여하고 있는 창고 리스트
-        List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
+        // List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid);
 
         // 회원의 기본적인 정보를 가져온다 (이름, 연락처, 우편번호, 주소, 상세주소)
         LogisUserInfo info = logisService.searchUserAddress(userUid);
 
         ModelAndView mav = new ModelAndView();
-        mav.addObject("warehouseNameList", warehouseNameList);
+        // mav.addObject("warehouseNameList", warehouseNameList);
         mav.addObject("userInfo", info);
         mav.setViewName("logis/apply/logisNormalApply");
         return mav;
@@ -246,6 +246,33 @@ public class LogisController {
             session.setAttribute("logisOrderInfoUid", -1);
         }
     }
+
+    /**
+     * 창고 입고신청 페이지로 이동하기 전에 사용자가 창고를 대여했는지 먼저 조회를 한다.
+     * 창고를 대여 했으면 true를 리턴한다.
+     */
+    @RequestMapping(value = "/checkUsingWarehouse")
+    public void checkUsingWarehouse(HttpServletRequest request, Model model) {
+        HttpSession session = request.getSession();
+        String userUid = (String) session.getAttribute("userUid");
+
+        boolean result = logisService.checkUsingWarehouse(userUid);
+        model.addAttribute("result", result);
+    }
+
+    /**
+     * 사용자가 설정한 날짜를 기준으로 대여중인 창고를 조회한다.
+     */
+    @RequestMapping(value = "/searhLentalWarehouse")
+    public void searhLentalWarehouse(HttpServletRequest request, String date, Model model) {
+        HttpSession session = request.getSession();
+        String userUid = (String) session.getAttribute("userUid");
+
+        // 현재 대여하고 있는 창고 리스트
+        List<WarehouseInfo> warehouseNameList = warehouseApplyService.getUsingWarehouseName(userUid, date);
+        model.addAttribute("warehouseList", warehouseNameList);
+    }
+
 
     public boolean validationDate(String checkDate) {
         try {
