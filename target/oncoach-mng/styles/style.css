@@ -1,8 +1,0 @@
-@charset "utf-8";
-
-/*datepicker*/
-@import url(bootstrap-datetimepicker.css);
-/*common,reset tag,font&scrollset,commoncss..*/
-@import url(common.css);
-/*layout,detailpage..*/ 
-@import url(content.css);

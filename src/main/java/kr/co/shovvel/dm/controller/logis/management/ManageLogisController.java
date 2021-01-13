@@ -172,6 +172,9 @@ public class ManageLogisController {
         return gson.toJson(data);
     }
 
+    /**
+     * RFID와 물품을 등록한다.
+     */
     @RequestMapping(value = "/addLogisItem", produces = "text/plain;charset=UTF-8")
     @ResponseBody
     public String addLogisItem(@RequestBody Map<String, Object> param) {
@@ -180,6 +183,7 @@ public class ManageLogisController {
         String logisOrderInfo = (String) param.get("logisOrderInfo");
         String itemInfo = (String) param.get("itemInfo");
 
+        // 물류 고유번호를 이용해서 창고 고유번호를 검색한다.
         managementService.logisItemAction(rfidUid, logisOrderInfo, itemInfo);
 
         Map<String, Object> data = new HashMap<>();

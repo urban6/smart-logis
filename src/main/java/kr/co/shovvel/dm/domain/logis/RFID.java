@@ -6,6 +6,7 @@ public class RFID {
     private String rfidUid;
     private String logisOrderUid;
     private String itemUid;
+    private String orderInfoUid;
 
     public String getRfidNo() {
         return rfidNo;
@@ -37,5 +38,13 @@ public class RFID {
 
     public void setItemUid(String itemUid) {
         this.itemUid = itemUid;
+    }
+
+    public String getOrderInfoUid() {
+        return orderInfoUid;
+    }
+
+    public void setOrderInfoUid(String orderInfoUid) {
+        this.orderInfoUid = orderInfoUid;
     }
 }

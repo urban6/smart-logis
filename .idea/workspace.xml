@@ -376,7 +376,7 @@
     <property name="project.structure.proportion" value="0.17773438" />
     <property name="project.structure.side.proportion" value="0.25540274" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="editing.templates" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Color Scheme Font" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>
   <component name="RecentsManager">
@@ -562,6 +562,8 @@
       <workItem from="1610183745083" duration="21389000" />
       <workItem from="1610331948622" duration="314000" />
       <workItem from="1610335345300" duration="3132000" />
+      <workItem from="1610355326432" duration="1534000" />
+      <workItem from="1610522439212" duration="239000" />
     </task>
     <task id="LOCAL-00001" summary="10/16 - 택시 사용자 로그인 기능 구현">
       <created>1602828407035</created>

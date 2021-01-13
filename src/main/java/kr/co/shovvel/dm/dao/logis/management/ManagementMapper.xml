@@ -94,15 +94,23 @@
     <!-- 기사가 물건을 추가할 때, 사용한다. -->
     <insert id="addItemUsingLogis" parameterType="kr.co.shovvel.dm.domain.warehouse.WarehouseItem"
             useGeneratedKeys="true" keyProperty="itemUid">
-        INSERT INTO warehouse_item(STATE, ITEM_INFO)
-        VALUES (0, #{itemInfo});
+        INSERT INTO warehouse_item(ORDER_INFO_UID, STATE, ITEM_INFO)
+        VALUES (#{orderInfoUid}, 0, #{itemInfo});
     </insert>
 
     <!-- 택배 기사가 물품에 RFID를 등록한다. -->
     <insert id="insertRfidByDriver" parameterType="kr.co.shovvel.dm.domain.logis.RFID">
-        INSERT INTO rfid(RFID_UID, ITEM_UID, LOGIS_ORDER_UID)
-        VALUES (#{rfidUid}, #{itemUid}, #{logisOrderUid});
+        INSERT INTO rfid(RFID_UID, ITEM_UID, LOGIS_ORDER_UID, ORDER_INFO_UID)
+        VALUES (#{rfidUid}, #{itemUid}, #{logisOrderUid}, #{orderInfoUid});
     </insert>
+
+    <!-- 물류신청 고유번호를 이용해서 창고신청 공유번호를 조회한다.
+         RFID를 추가할 때, 사용된다. -->
+    <select id="searchWhseOrderUid" parameterType="string" resultType="string">
+        SELECT WAREHOUSE_ORDER_UID
+        FROM logis_order_info
+        WHERE LOGIS_ORDER_UID = #{logisOrderUid};
+    </select>
 
     <!-- 배송 상세화면에서 포함된 물품을 조회한다. -->
     <select id="searchRfidItem" parameterType="string" resultType="kr.co.shovvel.dm.domain.logis.RFIDItem">

@@ -86,4 +86,6 @@ public interface ManagementMapper {
     void insertOutItemHistory(WarehouseItem warehouseItem);
 
     WarehouseItem searchItemForHistory(@Param(value = "itemUid") String itemUid);
+
+    String searchWhseOrderUid(String logisOrderUid);
 }

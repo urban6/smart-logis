@@ -1,8 +1,0 @@
-﻿$(document).ready(function(){
- $(".radio").click(function(){
-	$(".radio").removeClass("radio_sel");
-	$(this).addClass("radio_sel");
- });
-});
-
-

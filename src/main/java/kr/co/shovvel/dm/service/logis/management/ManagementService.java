@@ -174,15 +174,20 @@ public class ManagementService {
      * @param logisOrderInfo - 배송 고유번호
      */
     public void logisItemAction(String rfidUid, String logisOrderInfo, String itemInfo) {
+        // 사용자가 입고할 창고대여 고유번호를 검색한다.
+        String orderInfoUid = managementMapper.searchWhseOrderUid(logisOrderInfo);
+
         // warehouse_item에 데이터를 추가하고
         WarehouseItem item = new WarehouseItem();
         item.setItemInfo(itemInfo);
+        item.setOrderInfoUid(orderInfoUid);
         managementMapper.addItemUsingLogis(item);
 
         // RFID에 데이터를 위의 UID 값을 넣어준다.
         RFID rfid = new RFID();
         rfid.setRfidUid(rfidUid);
         rfid.setLogisOrderUid(logisOrderInfo);
+        rfid.setOrderInfoUid(orderInfoUid);
         rfid.setItemUid(item.getItemUid());
 
         managementMapper.insertRfidByDriver(rfid);
@@ -319,5 +324,12 @@ public class ManagementService {
             }
         }
         return false;
+    }
+
+    /**
+     * 물류신청 고유번호를 이용해서 사용자가 선택한 창고신청 고유번호를 조회한다.
+     */
+    public String searchWhseOrderUid(String logisOrderUid) {
+        return managementMapper.searchWhseOrderUid(logisOrderUid);
     }
 }
